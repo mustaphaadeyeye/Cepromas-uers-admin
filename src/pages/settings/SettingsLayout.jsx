@@ -6,7 +6,11 @@ import {
   fontWeight,
   textColor,
   fontFamily,
+  textDecoration,
+  letterSpacing,
+  bgColor,
 } from "../../components/styles/theme";
+import TransferIcon from "../../assets/icons/transfericon.png"
 
 import PersonalIcon from '../../assets/icons/UserCircle.png'   
 import ReferralIcon from '../../assets/icons/UsersFour.png'
@@ -14,6 +18,11 @@ import SecurityIcon from '../../assets/icons/Keyhole.png'
 import ContactIcon from '../../assets/icons/PhoneCall.png'
 import LogoutIcon from '../../assets/icons/SignOut.png'
 import EditIcon from '../../assets/icons/PencilSimpleLine.png'
+import InviteCode from './InviteCode';
+
+
+
+
 
 const menuItems = [
   { id: 'personal',  label: 'Personal Information', icon: PersonalIcon },
@@ -71,6 +80,9 @@ const PersonalInformation = () => (
 )
 
 const Referrals = () => (
+
+  <div>
+
   <div className='flex justify-center items-center flex-col'>
   <div
     style={{
@@ -94,10 +106,23 @@ const Referrals = () => (
     </p>
   </div>
 
-  <div className=''>
-    <p>Invite and Earn</p>
-  </div>
 </div>
+  <div className={`px-34 mt-8 `}>
+    <p className={`${fontSize.lg} ${fontWeight.medium} ${fontFamily.main}`}>Invite and Earn</p>
+    <p className='mt-1'>
+      Mauris adipiscing aliquam tristique integer adipiscing aliqu 
+      Mauris adipiscing aliquam tristique integer adipiscing aliquam
+    </p>
+  </div>
+
+  <div className='flex justify-center my-8'>
+    <img src={TransferIcon} alt="" />
+  </div>
+
+  <div className='flex justify-center my-2'>
+      <InviteCode code='jshetsnbff' />
+  </div>
+  </div>
 
 )
 
@@ -195,7 +220,7 @@ const SettingsLayout = () => {
           </div>
 
           {/* Right panel */}
-          <div className='flex-1 bg-white rounded-2xl p-6 flex flex-col gap-6'>
+          <div className={`flex-1 bg-white rounded-2xl p-6 flex flex-col gap-6 ${fontFamily.main}`}>
 
             {/* Avatar */}
             <div className='flex flex-col items-center gap-2'>

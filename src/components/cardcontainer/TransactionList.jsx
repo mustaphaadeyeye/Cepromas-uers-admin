@@ -29,7 +29,7 @@ const TransactionRow = ({ type, amount, date, id, status }) => {
       bg-white
     '>
       {/* Icon */}
-      <div className='bg-[#FEFAA2] rounded-lg p-2 w-9 h-9 flex items-center justify-center shrink-0'>
+      <div className='bg-[#FEFAA2] rounded-lg p-2 w-9 h-9 flex items-center justify-center shrink-0 '>
        <img src={ListIcon} alt="list icon" clas />
       </div>
 
@@ -39,7 +39,7 @@ const TransactionRow = ({ type, amount, date, id, status }) => {
         ${fontSize.base}
         ${fontWeight.normal}
         ${fontFamily.main}
-        w-[120px]
+        w-30
       `}>
         {type}
       </span>
@@ -50,7 +50,7 @@ const TransactionRow = ({ type, amount, date, id, status }) => {
         ${fontSize.base}
         ${fontWeight.normal}
         ${fontFamily.main}
-        w-[120px]
+        w-30
       `}>
         {amount}
       </span>
@@ -61,7 +61,7 @@ const TransactionRow = ({ type, amount, date, id, status }) => {
         ${fontSize.base}
         ${fontWeight.normal}
         ${fontFamily.main}
-        w-[200px]
+        w-50
       `}>
         {date}
       </span>
@@ -72,7 +72,7 @@ const TransactionRow = ({ type, amount, date, id, status }) => {
         ${fontSize.base}
         ${fontWeight.normal}
         ${fontFamily.main}
-        w-[160px]
+        w-40
       `}>
         {id}
       </span>

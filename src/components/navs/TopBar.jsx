@@ -99,8 +99,8 @@ const TopBar = () => {
             </div>
 
             {/* HAMBURGER → MD + SM ONLY */}
-            <div className="lg:hidden">
-              <button onClick={() => setOpen(!open)}>
+            <div className="lg:hidden ">
+              <button onClick={() => setOpen(!open)} className="cursor-pointer">
                 <div className="space-y-1">
                   <span className="block w-6 h-0.5 bg-[#05062F]"></span>
                   <span className="block w-6 h-0.5 bg-[#05062F]"></span>

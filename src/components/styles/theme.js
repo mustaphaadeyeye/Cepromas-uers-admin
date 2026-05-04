@@ -102,3 +102,4 @@ export const letterSpacing = {
   "4xl": "tracking-[16px]",
   "5xl": "tracking-[20px]",
 };
+
