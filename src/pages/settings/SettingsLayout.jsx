@@ -6,19 +6,22 @@ import {
   fontWeight,
   textColor,
   fontFamily,
-  textDecoration,
-  letterSpacing,
-  bgColor,
 } from "../../components/styles/theme";
 import TransferIcon from "../../assets/icons/transfericon.png"
-
 import PersonalIcon from '../../assets/icons/UserCircle.png'   
 import ReferralIcon from '../../assets/icons/UsersFour.png'
 import SecurityIcon from '../../assets/icons/Keyhole.png'
 import ContactIcon from '../../assets/icons/PhoneCall.png'
 import LogoutIcon from '../../assets/icons/SignOut.png'
 import EditIcon from '../../assets/icons/PencilSimpleLine.png'
-import InviteCode from './InviteCode';
+import InviteCode from './InviteCode'
+import LoginPwdIcon from '../../assets/icons/LoginPwd.png'
+
+import BiometricIcon from '../../assets/icons/Biometric.png'
+
+
+
+
 
 
 
@@ -32,6 +35,12 @@ const menuItems = [
   { id: 'logout',    label: 'Logout',                icon: LogoutIcon   },
 ]
 
+const securityItems = [
+  { label: 'Login Password',   sub: 'Change your login password',        icon: LoginPwdIcon       },
+  { label: 'Transaction Pin',  sub: 'set transaction pin', icon: LoginPwdIcon },
+  { label: 'Biometric Setup',  sub: 'Enable or disable biometric option',      icon: BiometricIcon      },
+]
+
 const personalFields = [
   { label: 'Full Name',    value: 'John Abraham'                  },
   { label: 'Email',        value: 'johnabraham@gmail.com'         },
@@ -42,15 +51,9 @@ const personalFields = [
 
 const PersonalInformation = () => (
   <div className='flex flex-col gap-5'>
-
-    
     <div className='flex flex-col items-center gap-2 mb-2'>
       <div className='relative'>
-        <img
-          src={ProfileImg}
-          alt='profile'
-          className='w-50 h-50 rounded-full object-cover'
-        />
+        <img src={ProfileImg} alt='profile' className='w-50 h-50 rounded-full object-cover' />
         <button className='absolute bottom-5 right-10 bg-white rounded-full p-1 shadow'>
           <img src={EditIcon} alt='edit' className='w-3.5 h-3.5' />
         </button>
@@ -59,8 +62,6 @@ const PersonalInformation = () => (
         John Abraham
       </span>
     </div>
-
-    {/* Fields */}
     {personalFields.map((field) => (
       <div key={field.label} className='flex items-start justify-between border-b border-gray-100 pb-4'>
         <div className='flex flex-col gap-1'>
@@ -80,62 +81,57 @@ const PersonalInformation = () => (
 )
 
 const Referrals = () => (
-
   <div>
+    <div className='flex justify-center items-center flex-col'>
+      <div
+        style={{ background: 'linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)' }}
+        className="rounded-md p-5 md:p-10 w-full xl:w-160 h-40"
+      >
+        <h1 className={`${fontSize.lg} ${fontWeight.normal} ${textColor.white} ${fontFamily.main}`}>
+          Reward Balance
+        </h1>
+        <p className={`${fontSize["4xl"]} ${fontWeight.medium} ${textColor.white} ${fontFamily.main} mt-2`}>
+          ₦20,000
+        </p>
+      </div>
+    </div>
 
-  <div className='flex justify-center items-center flex-col'>
-  <div
-    style={{
-        background: 'linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)',
-      }}
-      className="
-        rounded-md
-        p-5 md:p-10
-        w-full xl:w-160
-        h-40
+    <div className='px-4 xl:px-34 mt-8'>
+      <p className={`${fontSize.lg} ${fontWeight.medium} ${fontFamily.main}`}>Invite and Earn</p>
+      <p className={`${fontSize.lg} ${fontWeight.normal} ${fontFamily.main} mt-1`}>
+        Mauris adipiscing aliquam tristique integer adipiscing aliqu 
+        Mauris adipiscing aliquam tristique integer adipiscing aliquam
+      </p>
+    </div>
 
-        
-      "
-  >
-    <h1 className={`${fontSize.lg} ${fontWeight.normal} ${textColor.white} ${fontFamily.main}`}>
-      Reward Balance
-    </h1>
+    <div className='flex justify-center my-8'>
+      <img src={TransferIcon} alt="" />
+    </div>
 
-    <p className={`${fontSize["4xl"]} ${fontWeight.semiboldbold} ${textColor.white} ${fontFamily.main} mt-2`}>
-      ₦20,000
-    </p>
-  </div>
-
-</div>
-  <div className={`px-34 mt-8 `}>
-    <p className={`${fontSize.lg} ${fontWeight.medium} ${fontFamily.main}`}>Invite and Earn</p>
-    <p className='mt-1'>
-      Mauris adipiscing aliquam tristique integer adipiscing aliqu 
-      Mauris adipiscing aliquam tristique integer adipiscing aliquam
-    </p>
-  </div>
-
-  <div className='flex justify-center my-8'>
-    <img src={TransferIcon} alt="" />
-  </div>
-
-  <div className='flex justify-center my-2'>
+    <div className='flex justify-center my-2'>
       <InviteCode code='jshetsnbff' />
+    </div>
   </div>
-  </div>
-
 )
 
 const Security = () => (
-  <div className='flex flex-col gap-5'>
-    {['Change Password', 'Two-Factor Authentication', 'Active Sessions'].map((item) => (
-      <div key={item} className='flex items-center justify-between border-b border-gray-100 pb-4'>
-        <span className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
-          {item}
-        </span>
+  <div className='flex flex-col gap-5 xl:px-12 lg:px-8 md:px-4 px-2'>
+    {securityItems.map((item) => (
+      <div key={item.label} className='flex items-center justify-between border-b border-gray-100 pb-4'>
+        
+        <div className='flex flex-col gap-1'>
+          <span className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+            {item.label}
+          </span>
+          <span className={`${fontSize.xs} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}>
+            {item.sub}
+          </span>
+        </div>
+
         <button className='p-2 rounded-lg hover:bg-gray-100 transition'>
-          <img src={EditIcon} alt='edit' className='w-4 h-4' />
+          <img src={item.icon} alt={item.label} className='' />
         </button>
+
       </div>
     ))}
   </div>
@@ -161,32 +157,76 @@ const contentMap = {
 }
 
 const SettingsLayout = () => {
-  const [active, setActive] = useState('personal')
+  const [active, setActive]       = useState('personal')
+  const [menuOpen, setMenuOpen]   = useState(false)
 
   const handleMenu = (id) => {
     if (id === 'logout') {
       console.log('logging out...')
+      setMenuOpen(false)
       return
     }
     setActive(id)
+    setMenuOpen(false)
   }
 
   return (
     <div>
       <Wrapper>
+
+        {/* ── Hamburger bar — visible only on md and below ── */}
+        <div className='flex lg:hidden items-center justify-between bg-white rounded-2xl px-4 py-3 mb-4'>
+          <div className='flex items-center gap-3'>
+            <img src={ProfileImg} alt='profile' className='w-9 h-9 rounded-full object-cover' />
+            <span className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+              John Abraham
+            </span>
+          </div>
+
+          {/* Hamburger icon */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className='flex flex-col gap-1.5 p-2 rounded-lg hover:bg-gray-100 transition'
+          >
+            <span className={`block w-5 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+          </button>
+        </div>
+
+        {/* ── Dropdown menu — only md and mobile phone */}
+        {menuOpen && (
+          <div className='lg:hidden bg-white rounded-2xl p-4 mb-4 flex flex-col gap-2'>
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleMenu(item.id)}
+                className={`
+                  flex items-center gap-3 px-4 py-3 rounded-xl w-full text-left
+                  transition duration-200 whitespace-nowrap
+                  shadow-sm cursor-pointer
+                  ${active === item.id ? 'bg-gray-100' : 'hover:bg-gray-50'}
+                `}
+              >
+                <img src={item.icon} alt={item.label} className='w-4 h-4 shrink-0' />
+                <span className={`${fontSize.sm} ${fontWeight.normal} ${textColor.primary} ${fontFamily.main}`}>
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ── Main layout ── */}
         <div className='flex gap-6 items-stretch'>
 
-          {/* Left panel */}
-          <div className='w-70 shrink-0 bg-white rounded-2xl p-5 flex flex-col items-center gap-6'>
+          {/* Left panel — hidden on md and below */}
+          <div className='hidden lg:flex w-70 shrink-0 bg-white rounded-2xl p-5 flex-col items-center gap-6'>
 
             {/* Avatar */}
             <div className='flex flex-col items-center gap-2'>
               <div className='relative'>
-                <img
-                  src={ProfileImg}
-                  alt='profile'
-                  className='w-50 h-50 rounded-full object-cover'
-                />
+                <img src={ProfileImg} alt='profile' className='w-50 h-50 rounded-full object-cover' />
                 <button className='absolute bottom-5 right-10 bg-white rounded-full p-1 shadow'>
                   <img src={EditIcon} alt='edit' className='w-3.5 h-3.5' />
                 </button>
@@ -197,15 +237,15 @@ const SettingsLayout = () => {
             </div>
 
             {/* Menu */}
-            <div className='w-full flex flex-col gap-6 '>
+            <div className='w-full flex flex-col gap-6'>
               {menuItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => handleMenu(item.id)}
                   className={`
-                    flex items-center gap-3 px-4 py-3  w-full text-left
+                    flex items-center gap-3 px-4 py-3 w-full text-left
                     transition duration-200 whitespace-nowrap
-                    bg-[#FFFFFF] shadow-sm rounded-xl p-3 cursor-pointer
+                    bg-white shadow-sm rounded-xl cursor-pointer
                     ${active === item.id ? 'bg-gray-100' : 'hover:bg-gray-50'}
                   `}
                 >
@@ -216,34 +256,13 @@ const SettingsLayout = () => {
                 </button>
               ))}
             </div>
-
           </div>
 
           {/* Right panel */}
           <div className={`flex-1 bg-white rounded-2xl p-6 flex flex-col gap-6 ${fontFamily.main}`}>
-
-            {/* Avatar */}
-            <div className='flex flex-col items-center gap-2'>
-              <div className='relative'>
-                {/* <img
-                  src={ProfileImg}
-                  alt='profile'
-                  className='w-[200px] h-[200px] rounded-full object-cover'
-                /> */}
-                {/* <button className='absolute bottom-5 right-10 bg-white rounded-full p-1 shadow'>
-                  <img src={EditIcon} alt='edit' className='w-3.5 h-3.5' />
-                </button> */}
-              </div>
-              {/* <span className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
-                John Abraham
-              </span> */}
-            </div>
-
-            {/* Dynamic content */}
             <div>
               {contentMap[active]}
             </div>
-
           </div>
 
         </div>

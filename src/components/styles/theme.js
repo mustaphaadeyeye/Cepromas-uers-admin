@@ -72,11 +72,6 @@ export const bgColor = {
 };
 
 
-// STYLE GUIDE HELPERS
-export const StyleGuide = {
-  contentFlex: "flex items-center gap-2",
-  flexContent: "flex justify-center gap-2",
-};
 
 
 // TEXT DECORATION

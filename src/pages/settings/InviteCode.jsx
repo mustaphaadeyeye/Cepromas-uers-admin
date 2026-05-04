@@ -16,7 +16,7 @@ const InviteCode = ({ code = 'jshetsnbff' }) => {
   }
 
   return (
-    <div className='w-160 rounded-2xl border border-gray-200 overflow-hidden'>
+    <div className='xl:w-160 w-full rounded-2xl border border-gray-200 overflow-hidden'>
 
       {/* Top section */}
       <div className='px-5 py-4 bg-white'>
