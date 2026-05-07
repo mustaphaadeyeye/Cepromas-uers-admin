@@ -15,6 +15,10 @@ import DropdownInput from "../../components/inputs/DropdownInput";
 import Button from "../../components/buttons/Button";
 import Cardbg from "../../components/cardcontainer/Cardbg";
 import DashImage from "./DashImage";
+import SearchFilterTabs from "../../components/inputs/SearchFilterTabs";
+
+
+
 
 const DashboardLayouts = () => {
   const [activeTab, setActiveTab] = useState('investments')
@@ -57,7 +61,7 @@ const DashboardLayouts = () => {
         <div className="mt-4 md:mt-5 lg:mt-5 xl:mt-5">
 
           {/* Tab headers */}
-          <div className="flex items-center gap-6 border-b border-gray-200 mb-5">
+          <div className="lg:flex items-center gap-6 border-b border-gray-200 mb-5  md:hidden hidden ">
 
             <button
               onClick={() => setActiveTab('investments')}
@@ -87,6 +91,13 @@ const DashboardLayouts = () => {
               Available Properties
             </button>
 
+          </div>
+
+          <div>
+            {/* Search + Filter + Tabs (mobile) */}
+            <div className="block lg:hidden mb-4 xl:hidden md:block">
+              <SearchFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
           </div>
 
           {/* Tab content */}
