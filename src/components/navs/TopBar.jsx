@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Wrapper from "../wrapper/Wrapper";
 
 import logoImg from "../../assets/image/realLogo.png";
@@ -12,11 +12,7 @@ import NotificationIcon from "../../assets/icons/notIcon.png";
 import { NavLink } from "react-router-dom";
 import SarahImg from "../../assets/image/sarahjohn.png";
 
-import {
-  fontSize,
-  fontWeight,
-  fontFamily,
-} from "../styles/theme";
+import { fontSize, fontWeight, fontFamily } from "../styles/theme";
 
 const navItems = [
   { label: "Dashboard", icon: DashImg,     path: "/"          },
@@ -26,6 +22,8 @@ const navItems = [
   { label: "Growth",    icon: GrowthIcon,  path: "/growth"    },
 ];
 
+const activeFilter = 'invert(20%) sepia(90%) saturate(5000%) hue-rotate(355deg) brightness(90%)'
+
 const TopBar = () => {
   return (
     <>
@@ -34,27 +32,34 @@ const TopBar = () => {
         <Wrapper>
           <div className="h-18 flex items-center justify-between">
 
-            {/* LEFT — Logo */}
+            {/* LEFT — Logo + Desktop Nav */}
             <div className="flex items-center xl:gap-14 lg:gap-7">
               <div className="flex items-center">
                 <img src={logoImg} alt="Logo" className="h-10 w-auto object-contain" />
               </div>
 
-              {/* NAV — desktop only */}
+              {/* Desktop Nav */}
               <nav className="hidden lg:flex items-center gap-6">
                 {navItems.map((item, index) => (
-                  <NavLink
-                    key={index}
-                    to={item.path}
-                    className={({ isActive }) => `
-                      flex items-center gap-2 cursor-pointer transition duration-200
-                      ${isActive ? "text-[#EC2614]" : "text-[#05062F]"}
-                    `}
-                  >
-                    <img src={item.icon} alt={item.label} className="w-5 h-5" />
-                    <span className={`${fontSize.md} ${fontWeight.normal} ${fontFamily.main}`}>
-                      {item.label}
-                    </span>
+                  <NavLink key={index} to={item.path}>
+                    {({ isActive }) => (
+                      <div className="flex items-center gap-2 cursor-pointer transition duration-200">
+                        <img
+                          src={item.icon}
+                          alt={item.label}
+                          className="w-3.5 h-3.5 transition duration-200"
+                          style={{ filter: isActive ? activeFilter : 'none' }}
+                        />
+                        <span
+                          className={`
+                            ${fontSize.md} ${fontWeight.normal} ${fontFamily.main}
+                            ${isActive ? 'text-[#EC2614]' : 'text-[#05062F]'}
+                          `}
+                        >
+                          {item.label}
+                        </span>
+                      </div>
+                    )}
                   </NavLink>
                 ))}
               </nav>
@@ -68,7 +73,7 @@ const TopBar = () => {
                 <SearchInput />
               </div>
 
-              {/* Notification — always visible */}
+              {/* Notification */}
               <div className="relative cursor-pointer">
                 <img
                   src={NotificationIcon}
@@ -77,7 +82,7 @@ const TopBar = () => {
                 />
               </div>
 
-              {/* Profile image — always visible */}
+              {/* Profile */}
               <img
                 src={SarahImg}
                 alt="Sarah John"
@@ -93,30 +98,24 @@ const TopBar = () => {
       <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 shadow-lg z-50">
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item, index) => (
-            <NavLink
-              key={index}
-              to={item.path}
-              className={({ isActive }) => `
-                flex flex-col items-center gap-1 py-1 px-3
-                transition duration-200 cursor-pointer
-                ${isActive ? "text-[#EC2614]" : "text-[#05062F]"}
-              `}
-            >
-              <img
-                src={item.icon}
-                alt={item.label}
-                className="w-6 h-6"
-              />
-              {/* <span className={`text-[10px] ${fontWeight.normal} ${fontFamily.main}`}>
-                {item.label}
-              </span> */}
+            <NavLink key={index} to={item.path}>
+              {({ isActive }) => (
+                <div className="flex flex-col items-center gap-1 py-1 px-3 cursor-pointer transition duration-200">
+                  <img
+                    src={item.icon}
+                    alt={item.label}
+                    className="w-6 h-6 transition duration-200"
+                    style={{ filter: isActive ? activeFilter : 'none' }}
+                  />
+                </div>
+              )}
             </NavLink>
           ))}
         </div>
       </nav>
 
-      {/* ── BOTTOM SPACER — pushes content above bottom nav on mobile ── */}
-      <div className="lg:hidden h-16 md:h-16" />
+      {/* ── BOTTOM SPACER ── */}
+      <div className="lg:hidden h-16" />
     </>
   )
 }
