@@ -10,8 +10,10 @@ import {
 } from "../../components/styles/theme";
 
 const SearchFilterTabs = ({ onTabChange }) => {
-  const [activeTab, setActiveTab] = useState('investments')
+  const [activeTab, setActiveTab] = useState('investments');
   const [activeSubTab, setActiveSubTab] = useState("rent");
+  const [showFilter, setShowFilter] = useState(false);
+const [filterType, setFilterType] = useState("");
 
   const handleTab = (tab) => {
     setActiveTab(tab)
@@ -33,14 +35,55 @@ const SearchFilterTabs = ({ onTabChange }) => {
             className="border-none"
           />
         </div>
-        <button className="
-          w-11 h-11 shrink-0
-          bg-[#F3F4F5] rounded-[10px]
-          flex items-center justify-center
-          cursor-pointer hover:opacity-80 transition
-        ">
-          <img src={FilterIcon} alt="filter" className="w-5 h-5" />
-        </button>
+      <div className="relative">
+  <button
+    onClick={() => setShowFilter(!showFilter)}
+    className="
+      w-11 h-11 shrink-0
+      bg-[#F3F4F5] rounded-[10px]
+      flex items-center justify-center
+      cursor-pointer hover:opacity-80 transition
+    "
+  >
+    <img src={FilterIcon} alt="filter" className="w-5 h-5" />
+  </button>
+
+  {showFilter && (
+    <div className="absolute top-full mt-2 right-0 bg-white shadow-md rounded-[10px] p-2 w-40 z-50">
+      
+      <p
+        onClick={() => {
+          setFilterType("low")
+          setShowFilter(false)
+        }}
+        className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+      >
+        Lowest Price
+      </p>
+
+      <p
+        onClick={() => {
+          setFilterType("short")
+          setShowFilter(false)
+        }}
+        className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+      >
+        &lt; 6 Months
+      </p>
+
+      <p
+        onClick={() => {
+          setFilterType("long")
+          setShowFilter(false)
+        }}
+        className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+      >
+        &gt; 6 Months
+      </p>
+
+    </div>
+  )}
+</div>
       </div>
 
       {/* Tabs row */}

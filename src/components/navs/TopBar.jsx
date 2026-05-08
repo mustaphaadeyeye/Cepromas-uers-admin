@@ -2,17 +2,18 @@ import React from "react";
 import Wrapper from "../wrapper/Wrapper";
 
 import logoImg from "../../assets/image/realLogo.png";
-import DashImg from "../../assets/icons/medash.png";
-import WalletIcon from "../../assets/icons/Wallet.png";
-import FavIcon from "../../assets/icons/faveicon.png";
-import SettingIcon from "../../assets/icons/seticon.png";
-import GrowthIcon from "../../assets/icons/groicon.png";
+import DashImg from "../../assets/icons/myhouse.png";
+import WalletIcon from "../../assets/icons/mywallet.svg";
+import FavIcon from "../../assets/icons/myfave.png";
+import SettingIcon from "../../assets/icons/myset.png";
+import GrowthIcon from "../../assets/icons/mygro.png";
 import SearchInput from "../inputs/SearchInput";
 import NotificationIcon from "../../assets/icons/notIcon.png";
 import { NavLink } from "react-router-dom";
 import SarahImg from "../../assets/image/sarahjohn.png";
-
-import { fontSize, fontWeight, fontFamily } from "../styles/theme";
+import ProfileImg from "../../assets/image/profile.png";
+import { fontSize, fontWeight, fontFamily, textColor } from "../styles/theme";
+import MyNotIcon from "../../assets/icons/mynoticon.png";
 
 const navItems = [
   { label: "Dashboard", icon: DashImg,     path: "/"          },
@@ -34,10 +35,27 @@ const TopBar = () => {
 
             {/* LEFT — Logo + Desktop Nav */}
             <div className="flex items-center xl:gap-14 lg:gap-7">
-              <div className="flex items-center">
+              <div className="xl:flex xl:items-center lg:flex lg:items-center md:hidden hidden">
                 <img src={logoImg} alt="Logo" className="h-10 w-auto object-contain" />
               </div>
+              {/* mobile nav */}
+               <div className="flex items-center gap-3 xl:hidden lg:hidden md:flex">
+  <img
+    src={ProfileImg}
+    alt="Profile"
+    className="h-10 w-10 rounded-full object-cover"
+  />
 
+  <div className="flex flex-col">
+    <span className="text-base font-semibold text-gray-800">
+      Hello John
+    </span>
+
+    <span className={`leading-tight w-[150px] ${fontWeight.light} ${fontSize.sm} ${fontFamily.main} ${textColor.primary} `}>
+      Discover, invest, and own properties with ease.
+    </span>
+  </div>
+</div>
               {/* Desktop Nav */}
               <nav className="hidden lg:flex items-center gap-6">
                 {navItems.map((item, index) => (
@@ -47,7 +65,7 @@ const TopBar = () => {
                         <img
                           src={item.icon}
                           alt={item.label}
-                          className="w-3.5 h-3.5 transition duration-200"
+                          className="w-[18px] h-[18px] transition duration-200"
                           style={{ filter: isActive ? activeFilter : 'none' }}
                         />
                         <span
@@ -74,11 +92,11 @@ const TopBar = () => {
               </div>
 
               {/* Notification */}
-              <div className="relative cursor-pointer">
+              <div className="relative cursor-pointer ">
                 <img
                   src={NotificationIcon}
                   alt="Notifications"
-                  className="hover:scale-105 transition"
+                  className="hover:scale-105 transition hidden lg:block"
                 />
               </div>
 
@@ -86,9 +104,13 @@ const TopBar = () => {
               <img
                 src={SarahImg}
                 alt="Sarah John"
-                className="w-9 h-9 rounded-full object-cover"
+                className="w-9 h-9 rounded-full object-cover hidden lg:block"
               />
-
+              <img
+                src={MyNotIcon}
+                alt="My Notifications"
+                className="w-9 h-9 rounded-full object-cover block lg:hidden"
+              />
             </div>
           </div>
         </Wrapper>

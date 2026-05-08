@@ -6,6 +6,7 @@ import DashboardLayouts from "./pages/dashboard/DashboardLayouts";
 import Wallet from "./pages/wallet/Wallet";
 import SettingsLayout from "./pages/settings/SettingsLayout";
 import FavouriteLayout from "./pages/favorites/FavouriteLayout";
+import InvestmentDescription from "./pages/dashboard/InvestmentDescription";
 
   
 
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="wallet" element={<Wallet />} />
         <Route path="settings" element={<SettingsLayout />} />
         <Route path="favorites" element={<FavouriteLayout />} />
+        <Route path="investment-description" element={<InvestmentDescription />} />
       </Route>
     </Routes>
   );

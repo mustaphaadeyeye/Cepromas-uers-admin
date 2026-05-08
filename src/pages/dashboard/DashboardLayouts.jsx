@@ -34,8 +34,9 @@ const DashboardLayouts = () => {
     relative
     h-48 md:h-64 lg:h-72 xl:h-80
     w-full bg-cover bg-center rounded-[20px]
-    flex items-end
+    lg:flex items-end
     overflow-hidden
+    md:hidden hidden
   "
 >
   {/* Dark gradient overlay at bottom */}
