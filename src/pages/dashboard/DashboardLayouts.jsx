@@ -16,6 +16,7 @@ import Button from "../../components/buttons/Button";
 import Cardbg from "../../components/cardcontainer/Cardbg";
 import DashImage from "./DashImage";
 import SearchFilterTabs from "../../components/inputs/SearchFilterTabs";
+import { Link } from "react-router-dom";
 
 
 
@@ -108,13 +109,15 @@ const DashboardLayouts = () => {
 
           {/* Tab content */}
           {activeTab === 'investments' && (
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 lg:gap-6 xl:gap-6">
-              <Cardbg />
-              <Cardbg />
-              <Cardbg />
-              <Cardbg />
-              <Cardbg />
-              <Cardbg />
+              
+              <Cardbg to="/investment-description" />
+              <Cardbg to="/investment-description" />
+              <Cardbg to="/investment-description" />
+              <Cardbg to="/investment-description" />
+              <Cardbg to="/investment-description" />
+              <Cardbg to="/investment-description" />
             </div>
           )}
 
