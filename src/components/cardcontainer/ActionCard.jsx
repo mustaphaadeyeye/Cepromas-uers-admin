@@ -16,13 +16,16 @@ const ActionCard = ({
   textColor = "text-[#05062F]",
   width = "w-[314px]",
   height = "h-[100px]",
+  onClick,
 }) => {
   return (
     <div
+     onClick={onClick}
       className={`
         ${bg}
         ${width}
         ${height}
+       
         rounded-2xl
         flex items-center justify-center
         gap-3

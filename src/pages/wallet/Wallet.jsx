@@ -14,13 +14,14 @@ import {
 } from "../../components/styles/theme";
 import FilterIcon from "../../assets/icons/filter.png"
 import { Link, Links } from 'react-router-dom'
-
+import ChooseAccountModal from '../../components/modals/ChooseAccountModal'
 
 
 
 
 const Wallet = () => {
   const [open, setOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
   return (
     <div>
       <Wrapper>
@@ -31,40 +32,41 @@ const Wallet = () => {
             <BalanceCard/>
           </div>
 
-          {/* Action cards stack on the right */}
-          <div className='flex flex-col gap-3'>
-            <ActionCard
-              icon={<img src={ArrowUp} alt="arrow up" className="w-5 h-5" />}
-              text="Withdraw"
-              bg='bg-[#E1FBC1]'
-             width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-              height='h-[85px]'
-            />
-             <ActionCard
-              icon={<img src={ArrowDown} alt="arrow up" className="w-5 h-5" />}
-              text="Add Money"
-              bg='bg-[#DBE8FD]'
-             width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-              height='h-[85px]'
-            />
-            <Link to="/wallet-interest">
-              <ActionCard
-                icon={<img src={ArrowChart} alt="arrow up" className="w-5 h-5" />}
-                text="Interest"
-                bg='bg-[#FEFAA2]'
-               width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-                height='h-[85px]'
-              />
-            </Link>
-            {/* <ActionCard
-              icon={<img src={ArrowChart} alt="arrow up" className="w-5 h-5" />}
-              text="Interest"
-              bg='bg-[#FEFAA2]'
-             width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-              height='h-[85px]'
-            /> */}
-            {/* Add more ActionCards here */}
-          </div>
+          {/* Action cards */}
+         <div className='flex flex-col gap-3'>
+  <ActionCard
+   onClick={() => setModalOpen('withdraw')}
+    icon={<img src={ArrowUp} alt="arrow up" className="w-5 h-5" />}
+    text="Withdraw"
+    bg='bg-[#E1FBC1]'
+    width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
+    height='h-[85px]'
+  />
+  <ActionCard
+  onClick={() => setModalOpen('addmoney')}
+    icon={<img src={ArrowDown} alt="arrow up" className="w-5 h-5" />}
+    text="Add Money"
+    bg='bg-[#DBE8FD]'
+    width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
+    height='h-[85px]'
+  />
+  <Link to="/wallet-interest">
+    <ActionCard
+      icon={<img src={ArrowChart} alt="arrow up" className="w-5 h-5" />}
+      text="Interest"
+      bg='bg-[#FEFAA2]'
+      width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
+      height='h-[85px]'
+    />
+  </Link>
+</div>
+
+{modalOpen && (
+  <ChooseAccountModal
+    type={modalOpen}
+    onClose={() => setModalOpen(false)}
+  />
+)}
 
         </div>
         <div className='mt-6'>

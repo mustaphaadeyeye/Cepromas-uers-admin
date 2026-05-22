@@ -11,34 +11,29 @@ import TransferIcon from "../../assets/icons/transfericon.png"
 import PersonalIcon from '../../assets/icons/UserCircle.png'   
 import ReferralIcon from '../../assets/icons/UsersFour.png'
 import SecurityIcon from '../../assets/icons/Keyhole.png'
+import HouseIcon from '../../assets/icons/House.png'
 import ContactIcon from '../../assets/icons/PhoneCall.png'
 import LogoutIcon from '../../assets/icons/SignOut.png'
 import EditIcon from '../../assets/icons/PencilSimpleLine.png'
 import InviteCode from './InviteCode'
 import LoginPwdIcon from '../../assets/icons/LoginPwd.png'
-
-import BiometricIcon from '../../assets/icons/Biometric.png'
-
-
-
-
-
-
-
+import SettingsModal from '../../components/modals/SettingsModal'
+import SecurityBgIcon from "../../assets/icons/securityicon.png"
+import ContactChat from '../../components/chatandconditions/ContactChat'
 
 
 const menuItems = [
-  { id: 'personal',  label: 'Personal Information', icon: PersonalIcon },
-  { id: 'referrals', label: 'Referrals',             icon: ReferralIcon },
-  { id: 'security',  label: 'Security',              icon: SecurityIcon },
-  { id: 'contact',   label: 'Contact Us',            icon: ContactIcon  },
-  { id: 'logout',    label: 'Logout',                icon: LogoutIcon   },
+  { id: 'personal',    label: 'Personal Information', icon: PersonalIcon },
+  { id: 'properties',  label: 'Managed Properties',   icon: HouseIcon    },
+  { id: 'referrals',   label: 'Referrals',             icon: ReferralIcon },
+  { id: 'security',    label: 'Security',              icon: SecurityIcon },
+  { id: 'contact',     label: 'Contact Us',            icon: ContactIcon  },
+  { id: 'logout',      label: 'Logout',                icon: LogoutIcon   },
 ]
 
 const securityItems = [
-  { label: 'Login Password',   sub: 'Change your login password',        icon: LoginPwdIcon       },
-  { label: 'Transaction Pin',  sub: 'set transaction pin', icon: LoginPwdIcon },
-  { label: 'Biometric Setup',  sub: 'Enable or disable biometric option',      icon: BiometricIcon      },
+  { label: 'Login Password',  sub: 'Change your login password', icon: LoginPwdIcon },
+  { label: 'Transaction Pin', sub: 'Set transaction pin',        icon: LoginPwdIcon },
 ]
 
 const personalFields = [
@@ -49,37 +44,149 @@ const personalFields = [
   { label: 'Occupation',   value: 'Software Engineer'             },
 ]
 
-const PersonalInformation = () => (
-  <div className='flex flex-col gap-5'>
-    <div className='flex flex-col items-center gap-2 mb-2'>
-      <div className='relative'>
-        <img src={ProfileImg} alt='profile' className='w-50 h-50 rounded-full object-cover' />
-        <button className='absolute bottom-5 right-10 bg-white rounded-full p-1 shadow'>
-          <img src={EditIcon} alt='edit' className='w-3.5 h-3.5' />
-        </button>
-      </div>
-      <span className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
-        John Abraham
-      </span>
-    </div>
-    {personalFields.map((field) => (
-      <div key={field.label} className='flex items-start justify-between border-b border-gray-100 pb-4'>
-        <div className='flex flex-col gap-1'>
-          <span className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
-            {field.label}
-          </span>
-          <span className={`${fontSize.sm} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}>
-            {field.value}
-          </span>
-        </div>
-        <button className='p-2 rounded-lg hover:bg-gray-100 transition'>
-          <img src={EditIcon} alt='edit' className='w-4 h-4' />
-        </button>
-      </div>
-    ))}
-  </div>
-)
+const properties = [
+  {
+    id: 1,
+    title: 'Luxury Apartments',
+    location: 'Lagos',
+    amount: '₦55,000',
+    date: 'January 31st, 2025',
+    roi: '30%',
+    duration: '9 months',
+    interestEarned: '₦20,000',
+    transactionId: '109928765412678',
+    rawDate: '10/09/2025',
+  },
+  {
+    id: 2,
+    title: 'Luxury Apartments',
+    location: 'Lagos',
+    amount: '₦55,000',
+    date: 'January 31st, 2025',
+    roi: '30%',
+    duration: '9 months',
+    interestEarned: '₦20,000',
+    transactionId: '109928765412679',
+    rawDate: '10/09/2025',
+  },
+]
 
+// Personal Information 
+const PersonalInformation = () => {
+  const [editField, setEditField] = useState(null)
+
+  return (
+    <div className='flex flex-col gap-5'>
+      <div className='flex flex-col items-center gap-2 mb-2'>
+        <div className='relative'>
+          <img src={ProfileImg} alt='profile' className='w-50 h-50 rounded-full object-cover' />
+          <button className='absolute bottom-5 right-10 bg-gray-200 rounded-full p-1 shadow'>
+            <img src={EditIcon} alt='edit' className='w-3.5 h-3.5' />
+          </button>
+        </div>
+        <span className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+          John Abraham
+        </span>
+      </div>
+
+      {personalFields.map((field) => (
+        <div key={field.label} className='flex items-start justify-between border-b border-gray-100 pb-4'>
+          <div className='flex flex-col gap-1'>
+            <span className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+              {field.label}
+            </span>
+            <span className={`${fontSize.sm} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}>
+              {field.value}
+            </span>
+          </div>
+          <button
+            onClick={() => setEditField(field)}
+            className='p-2 rounded-full bg-gray-100 transition cursor-pointer'
+          >
+            <img src={EditIcon} alt='edit' className='w-4 h-4' />
+          </button>
+        </div>
+      ))}
+
+      {editField && (
+        <SettingsModal
+          type='details'
+          field={editField.label}
+          value={editField.value}
+          onClose={() => setEditField(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+//  Managed Properties 
+const ManagedProperties = () => {
+  const [selectedItem, setSelectedItem] = useState(null)
+
+  return (
+    <div className='flex flex-col gap-5 py-5'>
+      <p className={`${fontSize.lg} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+        Bought Properties
+      </p>
+
+      <div className='flex flex-col gap-4'>
+        {properties.map((item) => (
+          <div
+            key={item.id}
+            onClick={() => setSelectedItem(item)}
+            className='bg-white rounded-[10px] shadow border-[0.2px] border-[#CCCCCCB2] p-5 flex flex-col gap-4 cursor-pointer hover:shadow-md transition duration-200'
+          >
+            <p className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+              {item.title}
+            </p>
+
+            <div className='flex items-start justify-between'>
+              <div className='flex flex-col gap-1'>
+                <p className={`${fontSize.xs} ${fontWeight.medium} ${textColor.secondary} ${fontFamily.main}`}>
+                  Location
+                </p>
+                <p className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+                  {item.location}
+                </p>
+              </div>
+              <div className='flex flex-col gap-1 text-right'>
+                <p className={`${fontSize.xs} ${fontWeight.medium} ${textColor.secondary} ${fontFamily.main}`}>
+                  Purchase Amount
+                </p>
+                <p className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+                  {item.amount}
+                </p>
+              </div>
+            </div>
+
+            <div className='border-t border-gray-100' />
+
+            <div className='flex items-center gap-2'>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke="#888" strokeWidth="1.8"/>
+                <path d="M16 2v4M8 2v4M3 10h18" stroke="#888" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+              <p className={`${fontSize.sm} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}>
+                Date Purchased: {item.date}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {selectedItem && (
+        <SettingsModal
+          type='property'
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+// Referrals 
 const Referrals = () => (
   <div>
     <div className='flex justify-center items-center flex-col'>
@@ -87,18 +194,28 @@ const Referrals = () => (
         style={{ background: 'linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)' }}
         className="rounded-md p-5 md:p-10 w-full xl:w-160 h-40"
       >
-        <h1 className={`${fontSize.lg} ${fontWeight.normal} ${textColor.white} ${fontFamily.main}`}>
-          Reward Balance
-        </h1>
-        <p className={`${fontSize["4xl"]} ${fontWeight.medium} ${textColor.white} ${fontFamily.main} mt-2`}>
-          ₦20,000
-        </p>
+        <div className='flex items-center gap-80'>
+          <h1 className={`${fontSize.lg} ${fontWeight.normal} ${textColor.white} ${fontFamily.main}`}>
+            Reward Balance
+          </h1>
+          <h1 className={`${fontSize['4xl']} ${fontWeight.medium} ${textColor.white} ${fontFamily.main}`}>
+            4
+          </h1>
+        </div>
+        <div className='flex items-center gap-75'>
+          <p className={`${fontSize["4xl"]} ${fontWeight.medium} ${textColor.white} ${fontFamily.main} mt-2`}>
+            ₦20,000
+          </p>
+          <p className={`${fontSize.sm} ${fontWeight.normal} ${textColor.white} ${fontFamily.main} mt-2`}>
+            Referrals
+          </p>
+        </div>
       </div>
     </div>
 
-    <div className='px-4 xl:px-34 mt-8'>
+    <div className='px-4 mt-8'>
       <p className={`${fontSize.lg} ${fontWeight.medium} ${fontFamily.main}`}>Invite and Earn</p>
-      <p className={`${fontSize.lg} ${fontWeight.normal} ${fontFamily.main} mt-1`}>
+      <p className={`${fontSize.lg} ${fontWeight.normal} ${fontFamily.main} ${textColor.primary} mt-1`}>
         Mauris adipiscing aliquam tristique integer adipiscing aliqu 
         Mauris adipiscing aliquam tristique integer adipiscing aliquam
       </p>
@@ -114,55 +231,71 @@ const Referrals = () => (
   </div>
 )
 
-const Security = () => (
-  <div className='flex flex-col gap-5 xl:px-12 lg:px-8 md:px-4 px-2'>
-    {securityItems.map((item) => (
-      <div key={item.label} className='flex items-center justify-between border-b border-gray-100 pb-4'>
-        
-        <div className='flex flex-col gap-1'>
-          <span className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
-            {item.label}
-          </span>
-          <span className={`${fontSize.xs} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}>
-            {item.sub}
-          </span>
+//  Security 
+const Security = () => {
+  const [securityModal, setSecurityModal] = useState(null)
+
+  return (
+    <div className='flex flex-col gap-5 xl:px-12 lg:px-8 md:px-4 px-2'>
+      {securityItems.map((item) => (
+        <div key={item.label} className='flex items-center justify-between border-b border-gray-100 pb-4'>
+          <div className='flex flex-col gap-1'>
+            <span className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+              {item.label}
+            </span>
+            <span className={`${fontSize.xs} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}>
+              {item.sub}
+            </span>
+          </div>
+          <button
+            onClick={() => setSecurityModal(item.label)}
+            className='p-2 rounded-lg transition cursor-pointer'
+          >
+            <img src={item.icon} alt={item.label} />
+          </button>
         </div>
+      ))}
 
-        <button className='p-2 rounded-lg hover:bg-gray-100 transition'>
-          <img src={item.icon} alt={item.label} className='' />
-        </button>
-
+      <div className='flex justify-center mt-10 opacity-10'>
+        <img src={SecurityBgIcon} alt='security' className='mt-10' />
       </div>
-    ))}
-  </div>
-)
 
-const ContactUs = () => (
-  <div className='flex flex-col gap-3'>
-    <p className={`${fontSize.md} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}>
-      Need help? Reach us at:
-    </p>
-    <p className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
-      support@yourapp.com
-    </p>
-  </div>
-)
-
-const contentMap = {
-  personal:  <PersonalInformation />,
-  referrals: <Referrals />,
-  security:  <Security />,
-  contact:   <ContactUs />,
-  logout:    null,
+      {securityModal === 'Login Password' && (
+        <SettingsModal type='password' onClose={() => setSecurityModal(null)} />
+      )}
+      {securityModal === 'Transaction Pin' && (
+        <SettingsModal type='pin' onClose={() => setSecurityModal(null)} />
+      )}
+    </div>
+  )
 }
 
+// Contact Us
+const ContactUs = () => (
+  <div className='flex flex-col h-full'>
+    <ContactChat variant='settings' />
+  </div>
+)
+
+// Content map 
+const contentMap = {
+  personal:   <PersonalInformation />,
+  properties: <ManagedProperties />,
+  referrals:  <Referrals />,
+  security:   <Security />,
+  contact:    <ContactUs />,
+  logout:     null,
+}
+
+// Main Layout 
 const SettingsLayout = () => {
-  const [active, setActive]       = useState('personal')
+ const [active, setActive]       = useState('personal')
   const [menuOpen, setMenuOpen]   = useState(false)
+  const [showLogout, setShowLogout] = useState(false)
 
   const handleMenu = (id) => {
     if (id === 'logout') {
-      console.log('logging out...')
+      setShowLogout(true)
       setMenuOpen(false)
       return
     }
@@ -170,11 +303,17 @@ const SettingsLayout = () => {
     setMenuOpen(false)
   }
 
+  const handleConfirmLogout = () => {
+    setShowLogout(false)
+    console.log('logged out')
+   
+  }
+
   return (
     <div>
       <Wrapper>
 
-        {/* ── Hamburger bar — visible only on md and below ── */}
+        {/* Hamburger bar — mobile/md only */}
         <div className='flex lg:hidden items-center justify-between bg-white rounded-2xl px-4 py-3 mb-4'>
           <div className='flex items-center gap-3'>
             <img src={ProfileImg} alt='profile' className='w-9 h-9 rounded-full object-cover' />
@@ -182,8 +321,6 @@ const SettingsLayout = () => {
               John Abraham
             </span>
           </div>
-
-          {/* Hamburger icon */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className='flex flex-col gap-1.5 p-2 rounded-lg hover:bg-gray-100 transition'
@@ -194,7 +331,7 @@ const SettingsLayout = () => {
           </button>
         </div>
 
-        {/* ── Dropdown menu — only md and mobile phone */}
+        {/* Mobile dropdown menu */}
         {menuOpen && (
           <div className='lg:hidden bg-white rounded-2xl p-4 mb-4 flex flex-col gap-2'>
             {menuItems.map((item) => (
@@ -203,8 +340,7 @@ const SettingsLayout = () => {
                 onClick={() => handleMenu(item.id)}
                 className={`
                   flex items-center gap-3 px-4 py-3 rounded-xl w-full text-left
-                  transition duration-200 whitespace-nowrap
-                  shadow-sm cursor-pointer
+                  transition duration-200 whitespace-nowrap shadow-sm cursor-pointer
                   ${active === item.id ? 'bg-gray-100' : 'hover:bg-gray-50'}
                 `}
               >
@@ -217,13 +353,11 @@ const SettingsLayout = () => {
           </div>
         )}
 
-        {/* ── Main layout ── */}
+        {/* Main layout */}
         <div className='flex gap-6 items-stretch'>
 
-          {/* Left panel — hidden on md and below */}
-          <div className='hidden lg:flex w-70 shrink-0 bg-white rounded-2xl p-5 flex-col items-center gap-6'>
-
-            {/* Avatar */}
+          {/* Left panel — desktop only */}
+          <div className='hidden lg:flex w-100 shrink-0 bg-white rounded-2xl p-5 flex-col items-center gap-6'>
             <div className='flex flex-col items-center gap-2'>
               <div className='relative'>
                 <img src={ProfileImg} alt='profile' className='w-50 h-50 rounded-full object-cover' />
@@ -236,20 +370,19 @@ const SettingsLayout = () => {
               </span>
             </div>
 
-            {/* Menu */}
             <div className='w-full flex flex-col gap-6'>
               {menuItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => handleMenu(item.id)}
                   className={`
-                    flex items-center gap-3 px-4 py-3 w-full text-left
+                    flex items-center gap-3 px-4 py-5 w-full text-left
                     transition duration-200 whitespace-nowrap
-                    bg-white shadow-sm rounded-xl cursor-pointer
-                    ${active === item.id ? 'bg-gray-100' : 'hover:bg-gray-50'}
+                    shadow-sm rounded-xl cursor-pointer
+                    ${active === item.id ? 'bg-[#DBE8FD]' : 'bg-white hover:bg-gray-50'}
                   `}
                 >
-                  <img src={item.icon} alt={item.label} className='w-4 h-4 shrink-0' />
+                  <img src={item.icon} alt={item.label} className='w-5 h-5 shrink-0' />
                   <span className={`${fontSize.sm} ${fontWeight.normal} ${textColor.primary} ${fontFamily.main}`}>
                     {item.label}
                   </span>
@@ -259,13 +392,21 @@ const SettingsLayout = () => {
           </div>
 
           {/* Right panel */}
-          <div className={`flex-1 bg-white rounded-2xl p-6 flex flex-col gap-6 ${fontFamily.main}`}>
-            <div>
+          <div className={`flex-1 bg-white rounded-2xl px-20 py-5 flex flex-col gap-6 ${fontFamily.main} h-full`}>
+            <div className='flex-1 flex flex-col h-full'>
               {contentMap[active]}
             </div>
           </div>
 
         </div>
+         {/* Logout modal */}
+        {showLogout && (
+          <SettingsModal
+            type='logout'
+            onClose={() => setShowLogout(false)}
+            onConfirmLogout={handleConfirmLogout}
+          />
+        )}
       </Wrapper>
     </div>
   )

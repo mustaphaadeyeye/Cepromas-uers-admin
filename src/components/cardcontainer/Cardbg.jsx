@@ -1,32 +1,46 @@
-// Cardbg.jsx
 import React, { useState } from 'react'
 import Bgimg from "../../assets/image/bgcard.png"
 import { fontSize, fontWeight, fontFamily, textColor } from "../../components/styles/theme";
-import LoveIcon from "../../assets/icons/mylove.svg"
 import { Link } from 'react-router-dom';
 
-const Cardbg = ({ to }) => {  // 
+const HeartIcon = ({ filled }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="18"
+    height="16"
+    viewBox="0 0 24 24"
+    fill={filled ? "#e00000" : "none"}
+    stroke={filled ? "#e00000" : "#000000"}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+)
+
+const Cardbg = ({ to }) => {
   const [liked, setLiked] = useState(false);
 
-  const Wrapper = to ? Link : 'div';  
+  const Wrapper = to ? Link : 'div';
 
   return (
     <div className='w-full rounded-[20px] bg-white shadow-md overflow-hidden relative'>
-      <Wrapper {...(to ? { to } : {})}>  
+      <Wrapper {...(to ? { to } : {})}>
 
         <img src={Bgimg} alt="bg" className='w-full h-50 object-cover' />
 
-        <img
-          src={LoveIcon}
-          alt="heart"
-          onClick={() => setLiked(!liked)}
-          className='absolute top-4 right-4 w-[20px] h-[18px] cursor-pointer transition'
-          style={{
-            filter: liked
-              ? "invert(16%) sepia(91%) saturate(7498%) hue-rotate(356deg) brightness(95%) contrast(118%)"
-              : "none"
+        {/* Heart */}
+        <div
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setLiked(!liked)
           }}
-        />
+          className='absolute top-4 right-4 w-9 h-9 rounded-full bg-[#FFFFFF] flex items-center justify-center cursor-pointer shadow-sm opacity-65'
+        >
+          <HeartIcon filled={liked} />
+        </div>
 
         <div className='py-3 px-4 flex flex-col gap-1'>
           <div className='flex justify-between items-center'>
