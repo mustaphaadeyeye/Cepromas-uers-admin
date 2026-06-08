@@ -70,6 +70,7 @@ export const bgColor = {
   white:       "bg-white",
   lightGray:   "bg-gray-100",
   darkGray: "bg-gray-300",
+  primary100: "bg-[#B7CFFC]"
 };
 
 

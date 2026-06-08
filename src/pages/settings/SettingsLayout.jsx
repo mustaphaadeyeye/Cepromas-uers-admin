@@ -20,7 +20,7 @@ import LoginPwdIcon from '../../assets/icons/LoginPwd.png'
 import SettingsModal from '../../components/modals/SettingsModal'
 import SecurityBgIcon from "../../assets/icons/securityicon.png"
 import ContactChat from '../../components/chatandconditions/ContactChat'
-
+import Pagination from "../../components/buttons/Pagination"
 
 const menuItems = [
   { id: 'personal',    label: 'Personal Information', icon: PersonalIcon },
@@ -173,6 +173,14 @@ const ManagedProperties = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      <div>
+        <Pagination
+          currentPage={1}
+          totalPages={3}
+          onPageChange={(page) => console.log('Go to page:', page)}
+        />
       </div>
 
       {selectedItem && (

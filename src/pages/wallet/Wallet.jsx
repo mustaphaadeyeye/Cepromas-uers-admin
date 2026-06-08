@@ -33,30 +33,34 @@ const Wallet = () => {
           </div>
 
           {/* Action cards */}
-         <div className='flex flex-col gap-3'>
+    <div className='flex  gap-3   xl:flex-col lg:flex-col md:flex-row flex-row'>
   <ActionCard
    onClick={() => setModalOpen('withdraw')}
     icon={<img src={ArrowUp} alt="arrow up" className="w-5 h-5" />}
     text="Withdraw"
     bg='bg-[#E1FBC1]'
-    width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-    height='h-[85px]'
+    width='w-[119px] md:w-full lg:w-[314px] xl:w-[314px]'
+    height='xl:h-[85px] lg:h-[85px] md:h-[85px] h-[38px]'
+    rounded="rounded-[6px]"
   />
   <ActionCard
   onClick={() => setModalOpen('addmoney')}
     icon={<img src={ArrowDown} alt="arrow up" className="w-5 h-5" />}
     text="Add Money"
+     mobileText="Fund Wallet"
     bg='bg-[#DBE8FD]'
-    width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-    height='h-[85px]'
+    width='w-[119px] md:w-full lg:w-[314px] xl:w-[314px]'
+    height='xl:h-[85px] lg:h-[85px] md:h-[85px] h-[38px]'
+    rounded="rounded-[6px]"
   />
   <Link to="/wallet-interest">
     <ActionCard
       icon={<img src={ArrowChart} alt="arrow up" className="w-5 h-5" />}
       text="Interest"
       bg='bg-[#FEFAA2]'
-      width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-      height='h-[85px]'
+      width='w-[119px] md:w-full lg:w-[314px] xl:w-[314px]'
+      height='xl:h-[85px] lg:h-[85px] md:h-[85px] h-[38px]'
+      rounded="rounded-[6px]"
     />
   </Link>
 </div>

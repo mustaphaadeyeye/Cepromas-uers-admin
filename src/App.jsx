@@ -11,6 +11,9 @@ import ContactChat from "./components/chatandconditions/ContactChat";
 import TermsAndConditions from "./components/chatandconditions/TermsAndConditions";
 import WalletSeeAll from "./pages/wallet/WalletSeeAll";
 import  WalletInterest from "./pages/wallet/WalletInterest";
+ import GrowthLayout from "./pages/growth/GrowthLayout";
+import GrowthInvesments from "./pages/growth/GrowthInvesments";
+
 
 
 
@@ -31,6 +34,8 @@ const App = () => {
         <Route path="terms" element={<TermsAndConditions />} />
         <Route path="wallet-see-all" element={<WalletSeeAll />} />
         <Route path="wallet-interest" element={<WalletInterest />} />
+        <Route path="growth" element={<GrowthLayout />} />
+        <Route path="investments" element={<GrowthInvesments/>}/>
       </Route>
     </Routes>
   );

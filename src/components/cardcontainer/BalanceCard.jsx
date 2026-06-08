@@ -16,10 +16,14 @@ const BalanceCard = () => {
         background: 'linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)',
       }}
       className="
-        rounded-[20px]
+        xl:rounded-[20px]
+        lg:rounded-[20px]
+        md:rounded-[20px]
+        rounded-[6px]
         p-5 md:p-6
-        w-full xl:w-238.5
-        h-70
+         md:w-full xl:w-238.5
+         lg:w-full w-[382px]
+        xl:h-70 lg:h-70 h-[179px]
          
         relative
       "
@@ -36,7 +40,7 @@ const BalanceCard = () => {
       </div>
 
       {/* Amount */}
-      <p className={`${textColor.white} ${fontSize["7xl"]} ${fontWeight.light} ${fontFamily.main} mt-4`}>
+      <p className={`${textColor.white}  ${fontWeight.light} ${fontFamily.main} mt-4 xl:text-7xl lg:text-3xl md:text-2xl text-[24px]`}>
         ₦500,000,000
       </p>
 
