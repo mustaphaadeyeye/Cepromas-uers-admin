@@ -28,7 +28,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
         {/* Tabs row */}
         <div className="flex items-center gap-3">
           <Button
-            text="Invest"
+            text="Investments"
             bg={
               activeTab === "investments"
                 ? "bg-[#05062F]"
@@ -50,7 +50,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
           />
 
           <Button
-            text="Properties"
+            text="Market Place"
             bg={
               activeTab === "properties"
                 ? "bg-[#05062F]"
@@ -151,12 +151,12 @@ const SearchFilterTabs = ({ onTabChange }) => {
       <div className="mt-6">
         {activeTab === "investments" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 lg:gap-6 xl:gap-6">
-            <Cardbg to="/investment-description" />
-            <Cardbg to="/investment-description" />
-            <Cardbg to="/investment-description" />
-            <Cardbg to="/investment-description" />
-            <Cardbg to="/investment-description" />
-            <Cardbg to="/investment-description" />
+            <Cardbg to="/app/investment-description" />
+            <Cardbg to="/app/investment-description" />
+            <Cardbg to="/app/investment-description" />
+            <Cardbg to="/app/investment-description" />
+            <Cardbg to="/app/investment-description" />
+            <Cardbg to="/app/investment-description" />
           </div>
         )}
 

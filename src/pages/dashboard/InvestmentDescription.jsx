@@ -8,7 +8,7 @@ import {
   textColor,
   bgColor,
 } from "../../components/styles/theme"
-import Arrowdown from "../../assets/icons/caretDown.jpg"
+import Arrowdown from "../../assets/icons/caretdown.jpg"
 import ActionCard from '../../components/cardcontainer/ActionCard'
 import Calenderimg from "../../assets/icons/Calendar.png"
 import trendUp from "../../assets/icons/TrendUp.png"
