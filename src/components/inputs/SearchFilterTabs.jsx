@@ -23,14 +23,44 @@ const [filterType, setFilterType] = useState("");
   return (
 
     <div>
-    <div className="flex flex-col gap-3 w-full bg-[#769AF2] p-4 rounded-[10px]">
+    <div className="flex flex-row gap-3 w-full bg-[#769AF2] p-4 rounded-[10px]">
+
+       {/* Tabs row */}
+      <div className="flex items-center gap-3">
+        <Button
+          text="Invest"
+          bg={activeTab === 'investments' ? 'bg-[#05062F]' : 'bg-[#F3F4F5]'}
+          width="w-[185px]"
+          height="h-[44px]"
+          rounded="rounded-[10px]"
+          className={`
+            flex-1
+            ${fontSize.md} ${fontWeight.medium} ${fontFamily.main}
+            ${activeTab === 'investments' ? 'text-white' : textColor.secondary}
+          `}
+          onClick={() => handleTab('investments')}
+        />
+        <Button
+          text="Properties"
+          bg={activeTab === 'properties' ? 'bg-[#05062F]' : 'bg-[#F3F4F5]'}
+          width="w-[185px]"
+          height="h-[44px]"
+          rounded="rounded-[10px]"
+          className={`
+            flex-1
+            ${fontSize.md} ${fontWeight.medium} ${fontFamily.main}
+            ${activeTab === 'properties' ? 'text-white' : textColor.secondary}
+          `}
+          onClick={() => handleTab('properties')}
+        />
+      </div>
 
       {/* Search + Filter row */}
       <div className="flex items-center gap-3">
         <div className="flex-1">
           <SearchInput
             placeholder="Search"
-            width="w-full"
+            width="w-[399px]"
             bg="bg-[#F3F4F5]"
             className="border-none"
           />
@@ -39,7 +69,7 @@ const [filterType, setFilterType] = useState("");
   <button
     onClick={() => setShowFilter(!showFilter)}
     className="
-      w-11 h-11 shrink-0
+      w-[44px] h-11 shrink-0
       bg-[#F3F4F5] rounded-[10px]
       flex items-center justify-center
       cursor-pointer hover:opacity-80 transition
@@ -84,37 +114,17 @@ const [filterType, setFilterType] = useState("");
     </div>
   )}
 </div>
+        <div className="flex-1">
+          <SearchInput
+            placeholder="Search"
+            width="w-[399px]"
+            bg="bg-[#F3F4F5]"
+            className="border-none"
+          />
+        </div>
       </div>
 
-      {/* Tabs row */}
-      <div className="flex items-center gap-3">
-        <Button
-          text="Invest"
-          bg={activeTab === 'investments' ? 'bg-[#05062F]' : 'bg-[#F3F4F5]'}
-          width="w-full"
-          height="h-[44px]"
-          rounded="rounded-[10px]"
-          className={`
-            flex-1
-            ${fontSize.md} ${fontWeight.medium} ${fontFamily.main}
-            ${activeTab === 'investments' ? 'text-white' : textColor.secondary}
-          `}
-          onClick={() => handleTab('investments')}
-        />
-        <Button
-          text="Properties"
-          bg={activeTab === 'properties' ? 'bg-[#05062F]' : 'bg-[#F3F4F5]'}
-          width="w-full"
-          height="h-[44px]"
-          rounded="rounded-[10px]"
-          className={`
-            flex-1
-            ${fontSize.md} ${fontWeight.medium} ${fontFamily.main}
-            ${activeTab === 'properties' ? 'text-white' : textColor.secondary}
-          `}
-          onClick={() => handleTab('properties')}
-        />
-      </div>
+     
 
     </div>
       {/* Dynamic heading */}

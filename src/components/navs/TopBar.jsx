@@ -1,29 +1,36 @@
 import React from "react";
 import Wrapper from "../wrapper/Wrapper";
-
-import logoImg from "../../assets/image/realLogo.png";
+import logoImg from "../../assets/icons/applogo.png";
 import DashImg from "../../assets/icons/myhouse.png";
 import WalletIcon from "../../assets/icons/mywallet.svg";
-import FavIcon from "../../assets/icons/myfave.png";
+import SavedIcon from "../../assets/icons/bookicon.png";
 import SettingIcon from "../../assets/icons/myset.png";
 import GrowthIcon from "../../assets/icons/mygro.png";
-import SearchInput from "../inputs/SearchInput";
+// import SearchInput from "../inputs/SearchInput";
 import NotificationIcon from "../../assets/icons/notIcon.png";
 import { NavLink } from "react-router-dom";
 import SarahImg from "../../assets/image/sarahjohn.png";
 import ProfileImg from "../../assets/image/profile.png";
 import { fontSize, fontWeight, fontFamily, textColor } from "../styles/theme";
 import MyNotIcon from "../../assets/icons/mynoticon.png";
+import StoreIcon from "../../assets/icons/store.png"
+import ChatIcon from "../../assets/icons/chaticon.png"
 
+// ✅ All paths now point to /app/*
 const navItems = [
-  { label: "Dashboard", icon: DashImg,     path: "/"          },
-  { label: "Wallet",    icon: WalletIcon,  path: "/wallet"    },
-  { label: "Favorites", icon: FavIcon,     path: "/favorites" },
-  { label: "Settings",  icon: SettingIcon, path: "/settings"  },
-  { label: "Growth",    icon: GrowthIcon,  path: "/growth"    },
+  { label: "Dashboard", icon: DashImg,     path: "/app"           },
+   { label: "Growth",    icon: GrowthIcon,  path: "/app/growth"    },
+   {label: "Market Place", icon: StoreIcon, path: "/app/market"},
+   {label: "Investment", icon: GrowthIcon,  path: "/app/investment"},
+  { label: "Wallet",    icon: WalletIcon,  path: "/app/wallet"    },
+  {label: "Saved", icon: SavedIcon, path: "/app/saved"},
+  // { label: "Favorites", icon: FavIcon,     path: "/app/favorites" },
+  {label: "Chat", icon: ChatIcon, path: "/app/chat"},
+  { label: "Settings",  icon: SettingIcon, path: "/app/settings"  },
+ 
 ];
 
-const activeFilter = 'invert(20%) sepia(90%) saturate(5000%) hue-rotate(355deg) brightness(90%)'
+const activeFilter = "invert(20%) sepia(90%) saturate(5000%) hue-rotate(355deg) brightness(90%)";
 
 const TopBar = () => {
   return (
@@ -38,69 +45,65 @@ const TopBar = () => {
               <div className="xl:flex xl:items-center lg:flex lg:items-center md:hidden hidden">
                 <img src={logoImg} alt="Logo" className="h-10 w-auto object-contain" />
               </div>
-              {/* mobile nav */}
-               <div className="flex items-center gap-3 xl:hidden lg:hidden md:flex">
-  <img
-    src={ProfileImg}
-    alt="Profile"
-    className="h-10 w-10 rounded-full object-cover"
-  />
 
-  <div className="flex flex-col">
-    <span className="text-base font-semibold text-gray-800">
-      Hello John
-    </span>
+              {/* Mobile greeting */}
+              <div className="flex items-center gap-3 xl:hidden lg:hidden md:flex">
+                <img
+                  src={ProfileImg}
+                  alt="Profile"
+                  className="h-10 w-10 rounded-full object-cover"
+                />
+                <div className="flex flex-col">
+                  <span className="text-base font-semibold text-gray-800">Hello John</span>
+                  <span className={`leading-tight w-[150px] ${fontWeight.light} ${fontSize.sm} ${fontFamily.main} ${textColor.primary}`}>
+                    Discover, invest, and own properties with ease.
+                  </span>
+                </div>
+              </div>
 
-    <span className={`leading-tight w-[150px] ${fontWeight.light} ${fontSize.sm} ${fontFamily.main} ${textColor.primary} `}>
-      Discover, invest, and own properties with ease.
-    </span>
-  </div>
-</div>
-              {/* Desktop Nav */}
-              <nav className="hidden lg:flex items-center gap-6">
-                {navItems.map((item, index) => (
-                  <NavLink key={index} to={item.path}>
-                    {({ isActive }) => (
-                      <div className="flex items-center gap-2 cursor-pointer transition duration-200">
-                        <img
-                          src={item.icon}
-                          alt={item.label}
-                          className="w-[18px] h-[18px] transition duration-200"
-                          style={{ filter: isActive ? activeFilter : 'none' }}
-                        />
-                        <span
-                          className={`
-                            ${fontSize.md} ${fontWeight.normal} ${fontFamily.main}
-                            ${isActive ? 'text-[#EC2614]' : 'text-[#05062F]'}
-                          `}
-                        >
-                          {item.label}
-                        </span>
-                      </div>
-                    )}
-                  </NavLink>
-                ))}
-              </nav>
+             {/* Desktop Nav */}
+<nav className="hidden lg:flex items-center gap-6">
+  {navItems.map((item, index) => (
+    <NavLink key={index} to={item.path}>
+      {({ isActive }) => (
+        <div className="flex items-center gap-2 cursor-pointer transition duration-200 flex-shrink-0">
+          <img
+            src={item.icon}
+            alt={item.label}
+            className="w-[18px] h-[18px] transition duration-200"
+            style={{ filter: isActive ? activeFilter : "none" }}
+          />
+
+          <span
+            className={`
+              whitespace-nowrap
+              ${fontSize.md}
+              ${fontWeight.normal}
+              ${fontFamily.main}
+              ${isActive ? "text-[#EC2614]" : "text-[#05062F]"}
+            `}
+          >
+            {item.label}
+          </span>
+        </div>
+      )}
+    </NavLink>
+  ))}
+</nav>
             </div>
 
             {/* RIGHT */}
             <div className="flex items-center gap-4">
-
-              {/* Search — desktop only */}
               <div className="hidden lg:block w-60">
-                <SearchInput />
+                {/* <SearchInput /> */}
               </div>
-
-              {/* Notification */}
-              <div className="relative cursor-pointer ">
+              <div className="relative cursor-pointer">
                 <img
                   src={NotificationIcon}
                   alt="Notifications"
                   className="hover:scale-105 transition hidden lg:block"
                 />
               </div>
-
-              {/* Profile */}
               <img
                 src={SarahImg}
                 alt="Sarah John"
@@ -127,7 +130,7 @@ const TopBar = () => {
                     src={item.icon}
                     alt={item.label}
                     className="w-6 h-6 transition duration-200"
-                    style={{ filter: isActive ? activeFilter : 'none' }}
+                    style={{ filter: isActive ? activeFilter : "none" }}
                   />
                 </div>
               )}
@@ -136,10 +139,9 @@ const TopBar = () => {
         </div>
       </nav>
 
-      {/* ── BOTTOM SPACER ── */}
       <div className="lg:hidden h-16" />
     </>
-  )
-}
+  );
+};
 
 export default TopBar;

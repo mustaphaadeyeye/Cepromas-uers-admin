@@ -10,21 +10,29 @@ import InvestmentDescription from "./pages/dashboard/InvestmentDescription";
 import ContactChat from "./components/chatandconditions/ContactChat";
 import TermsAndConditions from "./components/chatandconditions/TermsAndConditions";
 import WalletSeeAll from "./pages/wallet/WalletSeeAll";
-import  WalletInterest from "./pages/wallet/WalletInterest";
- import GrowthLayout from "./pages/growth/GrowthLayout";
+import WalletInterest from "./pages/wallet/WalletInterest";
+import GrowthLayout from "./pages/growth/GrowthLayout";
 import GrowthInvesments from "./pages/growth/GrowthInvesments";
-
-
-
-
-  
+import Login from "./pages/authentication/Login";
+import SignUp from "./pages/authentication/SignUp";
+import PersonalInfo from "./pages/authentication/PersonalInfo";
+import Kyc from "./pages/authentication/Kyc";
+import ForgotPassword from "./pages/authentication/ForgotPassword";
+import MarketPlace from "./pages/market/MarketPlace"
 
 
 const App = () => {
   return (
     <Routes>
-      
-      <Route path="/" element={<MainLayout />}>
+      {/* Login is the first page at "/" */}
+      <Route path="/" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/personal-info" element={<PersonalInfo />} />
+      <Route path="/kyc" element={<Kyc/>}/>
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      {/* All app pages live under "/app" */}
+      <Route path="/app" element={<MainLayout />}>
         <Route index element={<DashboardLayouts />} />
         <Route path="wallet" element={<Wallet />} />
         <Route path="settings" element={<SettingsLayout />} />
@@ -35,7 +43,8 @@ const App = () => {
         <Route path="wallet-see-all" element={<WalletSeeAll />} />
         <Route path="wallet-interest" element={<WalletInterest />} />
         <Route path="growth" element={<GrowthLayout />} />
-        <Route path="investments" element={<GrowthInvesments/>}/>
+        <Route path="investments" element={<GrowthInvesments />} />
+        <Route path="market" element={<MarketPlace/>}/>
       </Route>
     </Routes>
   );
