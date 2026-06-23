@@ -57,7 +57,8 @@ export const textColor = {
   muted:     "text-gray-500",
   dark:      "text-gray-900",
   darkGray: "#64748B",
-  dark: "text-[#000000]"
+  dark: "text-[#000000]",
+  lightBlue: "text-[#769AF2]",
 };
 
 
