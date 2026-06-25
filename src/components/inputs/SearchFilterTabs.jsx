@@ -24,7 +24,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
 
   return (
     <div>
-      <div className="flex flex-row gap-3">
+      <div className="flex xl:flex-row gap-3 lg:flex-row md:flex-row flex-col ">
         {/* Tabs row */}
         <div className="flex items-center gap-3">
           <Button
@@ -73,11 +73,11 @@ const SearchFilterTabs = ({ onTabChange }) => {
         </div>
 
         {/* Search + Filter row */}
-        <div className="flex items-center gap-3 w-full bg-[#769AF2] p-4 rounded-[10px] opacity-15">
+        <div className="flex items-center xl:flex-row lg:flex-row md:flex-row flex-col gap-3 w-full xl:bg-[#769AF2] p-4 rounded-[10px] xl:opacity-15">
           <div className="flex-1">
             <SearchInput
               placeholder="Search"
-              width="w-[399px]"
+             width="xl:w-[368px] lg:w-[368px] md:w-[368px] w-[350px]"
               height="h-[48px]"
               bg="bg-[#F3F4F5]"
               className="border-none"
@@ -135,7 +135,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
           <div className="flex-1">
             <SearchInput
               placeholder="Search"
-              width="w-[368px]"
+              width="xl:w-[368px] lg:w-[368px] md:w-[368px] w-[350px]"
               height="h-[48px]"
               bg="bg-[#F3F4F5]"
               className="border-none"
