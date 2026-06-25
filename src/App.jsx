@@ -19,6 +19,7 @@ import PersonalInfo from "./pages/authentication/PersonalInfo";
 import Kyc from "./pages/authentication/Kyc";
 import ForgotPassword from "./pages/authentication/ForgotPassword";
 import MarketPlace from "./pages/market/MarketPlace"
+import InvestmentLayout from "./pages/investment/InvestmentLayout";
 
 
 const App = () => {
@@ -45,6 +46,7 @@ const App = () => {
         <Route path="growth" element={<GrowthLayout />} />
         <Route path="investments" element={<GrowthInvesments />} />
         <Route path="market" element={<MarketPlace/>}/>
+        <Route path="investment" element={<InvestmentLayout />} />
       </Route>
     </Routes>
   );
