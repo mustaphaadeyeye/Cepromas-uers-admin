@@ -20,6 +20,10 @@ import Kyc from "./pages/authentication/Kyc";
 import ForgotPassword from "./pages/authentication/ForgotPassword";
 import MarketPlace from "./pages/market/MarketPlace"
 import InvestmentLayout from "./pages/investment/InvestmentLayout";
+import SavedLayout from "./pages/saved/SavedLayout";
+import ChatLayout from "./pages/chat/ChatLayout";
+
+
 
 
 const App = () => {
@@ -29,7 +33,7 @@ const App = () => {
       <Route path="/" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/personal-info" element={<PersonalInfo />} />
-      <Route path="/kyc" element={<Kyc/>}/>
+      <Route path="/kyc" element={<Kyc />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* All app pages live under "/app" */}
@@ -45,8 +49,10 @@ const App = () => {
         <Route path="wallet-interest" element={<WalletInterest />} />
         <Route path="growth" element={<GrowthLayout />} />
         <Route path="investments" element={<GrowthInvesments />} />
-        <Route path="market" element={<MarketPlace/>}/>
+        <Route path="market" element={<MarketPlace />} />
         <Route path="investment" element={<InvestmentLayout />} />
+        <Route path="saved" element={<SavedLayout />} />
+        <Route path="chat" element={<ChatLayout />} />
       </Route>
     </Routes>
   );

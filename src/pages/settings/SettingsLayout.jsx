@@ -21,6 +21,8 @@ import SettingsModal from '../../components/modals/SettingsModal'
 import SecurityBgIcon from "../../assets/icons/securityicon.png"
 import ContactChat from '../../components/chatandconditions/ContactChat'
 import Pagination from "../../components/buttons/Pagination"
+import Button from '../../components/buttons/Button';
+
 
 const menuItems = [
   { id: 'personal',    label: 'Personal Information', icon: PersonalIcon },
@@ -42,6 +44,7 @@ const personalFields = [
   { label: 'Phone Number', value: '+1-123-456-7890'               },
   { label: 'Address',      value: '123 Main St, Springfield, USA' },
   { label: 'Occupation',   value: 'Software Engineer'             },
+   { label: 'Nin',            value: '123456789'             },
 ]
 
 const properties = [
@@ -116,6 +119,19 @@ const PersonalInformation = () => {
           onClose={() => setEditField(null)}
         />
       )}
+      <div className='flex justify-center mt-10'>
+        <Button
+          text="Save"
+          bg="bg-[#05062F]"
+          width="w-[330px]"
+          height="h-[50px]"
+          rounded="rounded-[10px]"
+          className={`
+           text-white
+            ${fontSize.md} ${fontWeight.medium} ${fontFamily.main}
+          `}
+        />
+      </div>
     </div>
   )
 }
@@ -365,7 +381,7 @@ const SettingsLayout = () => {
         <div className='flex gap-6 items-stretch'>
 
           {/* Left panel — desktop only */}
-          <div className='hidden lg:flex w-100 shrink-0 bg-white rounded-2xl p-5 flex-col items-center gap-6'>
+          <div className='hidden lg:flex w-100 shrink-0 bg-white shadow-[100px_100px_100px_100px_rgba(0,0,0,0.1)] rounded-2xl p-5 flex-col items-center gap-6'>
             <div className='flex flex-col items-center gap-2'>
               <div className='relative'>
                 <img src={ProfileImg} alt='profile' className='w-50 h-50 rounded-full object-cover' />
@@ -400,7 +416,7 @@ const SettingsLayout = () => {
           </div>
 
           {/* Right panel */}
-          <div className={`flex-1 bg-white rounded-2xl px-20 py-5 flex flex-col gap-6 ${fontFamily.main} h-full`}>
+          <div className={`flex-1 bg-white shadow-[100px_100px_100px_100px_rgba(0,0,0,0.1)] rounded-2xl px-20 py-5 flex flex-col gap-6 ${fontFamily.main} h-full`}>
             <div className='flex-1 flex flex-col h-full'>
               {contentMap[active]}
             </div>

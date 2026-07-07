@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Bgimg from "../../assets/image/bgcard.png";
-import AgricImage from "../../assets/image/agricimage.png";
+// import Bgimg from "../../assets/image/bgcard.png";
+import AgricImage from "../../assets/image/agricinvest.png";
 import Cicon from "../../assets/icons/cicon.png";
 
 import {
@@ -11,11 +11,11 @@ import {
   textColor,
 } from "../../components/styles/theme";
 
-const Cardbg = ({ to }) => {
+const InvestmentEstate = ({ to }) => {
   const cards = [
     {
       id: 1,
-      image: Bgimg,
+      image: AgricImage,
       title: "Luxury Apartment",
       price: "₦50,000",
       location: "Mauris adipiscing aliquam",
@@ -37,7 +37,9 @@ const Cardbg = ({ to }) => {
     },
     {
       id: 3,
-      image: Bgimg,
+      image: AgricImage,
+      title: "Luxury Apartment",
+      price: "₦50,000",
       title: "Luxury Apartment",
       price: "₦50,000",
       location: "Mauris adipiscing aliquam",
@@ -59,7 +61,7 @@ const Cardbg = ({ to }) => {
     },
     {
       id: 5,
-      image: Bgimg,
+      image: AgricImage,
       title: "Luxury Apartment",
       price: "₦50,000",
       location: "Mauris adipiscing aliquam",
@@ -161,4 +163,4 @@ const Cardbg = ({ to }) => {
   );
 };
 
-export default Cardbg;
+export default InvestmentEstate;

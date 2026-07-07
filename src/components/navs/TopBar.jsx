@@ -16,18 +16,25 @@ import MyNotIcon from "../../assets/icons/mynoticon.png";
 import StoreIcon from "../../assets/icons/store.png"
 import ChatIcon from "../../assets/icons/chaticon.png"
 
-// ✅ All paths now point to /app/*
+
 const navItems = [
-  { label: "Dashboard", icon: DashImg,     path: "/app"           },
-   { label: "Growth",    icon: GrowthIcon,  path: "/app/growth"    },
-   {label: "Market Place", icon: StoreIcon, path: "/app/market"},
-   {label: "Investment", icon: GrowthIcon,  path: "/app/investment"},
-  { label: "Wallet",    icon: WalletIcon,  path: "/app/wallet"    },
-  {label: "Saved", icon: SavedIcon, path: "/app/saved"},
-  // { label: "Favorites", icon: FavIcon,     path: "/app/favorites" },
-  {label: "Chat", icon: ChatIcon, path: "/app/chat"},
-  { label: "Settings",  icon: SettingIcon, path: "/app/settings"  },
- 
+  { label: "Dashboard", icon: DashImg,     path: "/app",            end: true },
+  { label: "Growth",    icon: GrowthIcon,  path: "/app/growth",     end: true },
+  { label: "Market Place", icon: StoreIcon, path: "/app/market",    end: true },
+  { label: "Investment", icon: GrowthIcon,  path: "/app/investment", end: true },
+  { label: "Wallet",    icon: WalletIcon,  path: "/app/wallet",     end: true },
+  { label: "Saved", icon: SavedIcon, path: "/app/saved",             end: true },
+  { label: "Chat", icon: ChatIcon, path: "/app/chat",                end: true },
+  { label: "Settings",  icon: SettingIcon, path: "/app/settings",   end: true },
+];
+
+// Mobile bottom nav only shows these 5 items, with "Dashboard" relabeled as "Home"
+const bottomNavItems = [
+  { label: "Home",     icon: DashImg,     path: "/app",           end: true },
+  { label: "Growth",   icon: GrowthIcon,  path: "/app/growth",    end: true },
+  { label: "Wallet",   icon: WalletIcon,  path: "/app/wallet",    end: true },
+  { label: "Saved",    icon: SavedIcon,   path: "/app/saved",     end: true },
+  { label: "Settings", icon: SettingIcon, path: "/app/settings",  end: true },
 ];
 
 const activeFilter = "invert(20%) sepia(90%) saturate(5000%) hue-rotate(355deg) brightness(90%)";
@@ -61,35 +68,35 @@ const TopBar = () => {
                 </div>
               </div>
 
-             {/* Desktop Nav */}
-<nav className="hidden lg:flex items-center gap-6">
-  {navItems.map((item, index) => (
-    <NavLink key={index} to={item.path}>
-      {({ isActive }) => (
-        <div className="flex items-center gap-2 cursor-pointer transition duration-200 flex-shrink-0">
-          <img
-            src={item.icon}
-            alt={item.label}
-            className="w-[18px] h-[18px] transition duration-200"
-            style={{ filter: isActive ? activeFilter : "none" }}
-          />
+              {/* Desktop Nav */}
+              <nav className="hidden lg:flex items-center gap-6">
+                {navItems.map((item, index) => (
+                  <NavLink key={index} to={item.path} end={item.end}>
+                    {({ isActive }) => (
+                      <div className="flex items-center gap-2 cursor-pointer transition duration-200 flex-shrink-0">
+                        <img
+                          src={item.icon}
+                          alt={item.label}
+                          className="w-[18px] h-[18px] transition duration-200"
+                          style={{ filter: isActive ? activeFilter : "none" }}
+                        />
 
-          <span
-            className={`
-              whitespace-nowrap
-              ${fontSize.md}
-              ${fontWeight.normal}
-              ${fontFamily.main}
-              ${isActive ? "text-[#EC2614]" : "text-[#05062F]"}
-            `}
-          >
-            {item.label}
-          </span>
-        </div>
-      )}
-    </NavLink>
-  ))}
-</nav>
+                        <span
+                          className={`
+                            whitespace-nowrap
+                            ${fontSize.md}
+                            ${fontWeight.normal}
+                            ${fontFamily.main}
+                            ${isActive ? "text-[#EC2614]" : "text-[#05062F]"}
+                          `}
+                        >
+                          {item.label}
+                        </span>
+                      </div>
+                    )}
+                  </NavLink>
+                ))}
+              </nav>
             </div>
 
             {/* RIGHT */}
@@ -122,8 +129,8 @@ const TopBar = () => {
       {/* ── BOTTOM NAV — mobile only ── */}
       <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 shadow-lg z-50">
         <div className="flex items-center justify-around px-2 py-2">
-          {navItems.map((item, index) => (
-            <NavLink key={index} to={item.path}>
+          {bottomNavItems.map((item, index) => (
+            <NavLink key={index} to={item.path} end={item.end}>
               {({ isActive }) => (
                 <div className="flex flex-col items-center gap-1 py-1 px-3 cursor-pointer transition duration-200">
                   <img
@@ -132,6 +139,15 @@ const TopBar = () => {
                     className="w-6 h-6 transition duration-200"
                     style={{ filter: isActive ? activeFilter : "none" }}
                   />
+                  <span
+                    className={`
+                      text-[11px] leading-none
+                      ${fontFamily.main}
+                      ${isActive ? "text-[#EC2614] font-medium" : "text-[#05062F]"}
+                    `}
+                  >
+                    {item.label}
+                  </span>
                 </div>
               )}
             </NavLink>

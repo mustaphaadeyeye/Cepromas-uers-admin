@@ -18,9 +18,21 @@ const InvestmentLayout = () => {
             ${fontWeight.medium}
             ${textColor.primary}
             ${fontFamily.main}
+            lg:block md:hidden hidden
           `}
         >
           Investment Opportunities
+        </h1>
+             <h1
+          className={`
+           text-[16px]
+            font-semibold
+            ${textColor.primary}
+            ${fontFamily.main}
+            lg:hidden md:block block
+          `}
+        >
+         Investment - Explore Investment Opportunities
         </h1>
 
         <p
@@ -30,10 +42,24 @@ const InvestmentLayout = () => {
             ${fontWeight.normal}
             ${fontSize.lg}
             ${textColor.primary}
+             lg:block md:hidden hidden
           `}
         >
           Browse through our Real Estate and Agriculture
           investment opportunities.
+        </p>
+
+        <p
+          className={`
+            mt-4 mb-6
+            ${fontFamily.main}
+            ${fontWeight.normal}
+            ${fontSize.lg}
+            ${textColor.primary}
+             lg:hidden md:block block
+          `}
+        >
+         Discover real estate and agricultural projects designed to help you grow your wealth.
         </p>
 
         <InvestmentTabs />

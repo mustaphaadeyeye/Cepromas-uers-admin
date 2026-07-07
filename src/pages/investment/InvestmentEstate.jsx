@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Bgimg from "../../assets/image/bgcard.png";
-import AgricImage from "../../assets/image/agricimage.png";
+import AgricImage from "../../assets/image/estate.png";
 import Cicon from "../../assets/icons/cicon.png";
 
 import {
@@ -11,7 +11,7 @@ import {
   textColor,
 } from "../../components/styles/theme";
 
-const Cardbg = ({ to }) => {
+const InvestmentEstate = ({ to }) => {
   const cards = [
     {
       id: 1,
@@ -161,4 +161,4 @@ const Cardbg = ({ to }) => {
   );
 };
 
-export default Cardbg;
+export default InvestmentEstate;
