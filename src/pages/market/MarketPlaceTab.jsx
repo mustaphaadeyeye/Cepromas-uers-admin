@@ -8,8 +8,7 @@ import Bgimg5 from "../../assets/image/warehouse.png"
 import Bgimg6 from "../../assets/image/eventcenter.png"
 import { fontSize, fontWeight, fontFamily, textColor } from "../../components/styles/theme";
 
-const TABS = ['Apartment', 'Lands', 'Shops', 'Hostels', 'Warehouses', 'Event Centers']
-
+export const TABS = ['Apartment', 'Lands', 'Shops', 'Hostels', 'Warehouses', 'Event Centers']
 
 const LISTINGS = {
   Apartment: Array.from({ length: 6 }, (_, i) => ({
@@ -62,13 +61,17 @@ const LISTINGS = {
   })),
 }
 
-const MarketPlaceTab = () => {
-  const [activeTab, setActiveTab] = useState('Apartment')
+const MarketPlaceTab = ({ activeTab: activeTabProp, setActiveTab: setActiveTabProp, hideTabsOnMobile = false }) => {
+  const [internalTab, setInternalTab] = useState('Apartment')
+  const activeTab = activeTabProp ?? internalTab
+  const setActiveTab = setActiveTabProp ?? setInternalTab
   const listings = LISTINGS[activeTab] || []
 
   return (
     <div className={`w-full ${fontFamily.main}`}>
-      <div className="flex justify-start md:justify-center gap-6 md:gap-30 px-4 overflow-x-auto md:overflow-visible scrollbar-hide">
+      <div
+        className={`${hideTabsOnMobile ? "hidden md:flex" : "flex"} justify-start md:justify-center gap-6 md:gap-30 px-4 overflow-x-auto md:overflow-visible scrollbar-hide`}
+      >
         {TABS.map((tab) => {
           const isActive = tab === activeTab
           return (
@@ -82,9 +85,6 @@ const MarketPlaceTab = () => {
               }`}
             >
               {tab}
-              {isActive && (
-                <span className="" />
-              )}
             </button>
           )
         })}
