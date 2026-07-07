@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Wrapper from "../wrapper/Wrapper";
 import logoImg from "../../assets/icons/applogo.png";
 import DashImg from "../../assets/icons/myhouse.png";
@@ -12,9 +12,9 @@ import { NavLink } from "react-router-dom";
 import SarahImg from "../../assets/image/sarahjohn.png";
 import ProfileImg from "../../assets/image/profile.png";
 import { fontSize, fontWeight, fontFamily, textColor } from "../styles/theme";
-import MyNotIcon from "../../assets/icons/mynoticon.png";
 import StoreIcon from "../../assets/icons/store.png"
 import ChatIcon from "../../assets/icons/chaticon.png"
+import { FiMenu, FiX } from "react-icons/fi";
 
 
 const navItems = [
@@ -37,9 +37,17 @@ const bottomNavItems = [
   { label: "Settings", icon: SettingIcon, path: "/app/settings",  end: true },
 ];
 
+// Whatever is in navItems but NOT already reachable from bottomNavItems on mobile.
+// These are the items the hamburger menu will reveal.
+const hamburgerNavItems = navItems.filter(
+  (item) => !bottomNavItems.some((b) => b.path === item.path)
+);
+
 const activeFilter = "invert(20%) sepia(90%) saturate(5000%) hue-rotate(355deg) brightness(90%)";
 
 const TopBar = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <>
       {/* ── TOP HEADER ── */}
@@ -53,19 +61,19 @@ const TopBar = () => {
                 <img src={logoImg} alt="Logo" className="h-10 w-auto object-contain" />
               </div>
 
-              {/* Mobile greeting */}
-              <div className="flex items-center gap-3 xl:hidden lg:hidden md:flex">
-                <img
-                  src={ProfileImg}
-                  alt="Profile"
-                  className="h-10 w-10 rounded-full object-cover"
-                />
-                <div className="flex flex-col">
-                  <span className="text-base font-semibold text-gray-800">Hello John</span>
-                  <span className={`leading-tight w-[150px] ${fontWeight.light} ${fontSize.sm} ${fontFamily.main} ${textColor.primary}`}>
-                    Discover, invest, and own properties with ease.
-                  </span>
-                </div>
+              {/* Mobile: hamburger only */}
+              <div className="flex items-center xl:hidden lg:hidden">
+                <button
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  aria-label={menuOpen ? "Close menu" : "Open menu"}
+                  className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition"
+                >
+                  {menuOpen ? (
+                    <FiX className="text-xl text-[#05062F]" />
+                  ) : (
+                    <FiMenu className="text-xl text-[#05062F]" />
+                  )}
+                </button>
               </div>
 
               {/* Desktop Nav */}
@@ -117,13 +125,52 @@ const TopBar = () => {
                 className="w-9 h-9 rounded-full object-cover hidden lg:block"
               />
               <img
-                src={MyNotIcon}
-                alt="My Notifications"
+                src={ProfileImg}
+                alt="Profile"
                 className="w-9 h-9 rounded-full object-cover block lg:hidden"
               />
             </div>
           </div>
         </Wrapper>
+
+        {/* ── HAMBURGER DROPDOWN — mobile/tablet only ── */}
+        {menuOpen && (
+          <div className="lg:hidden border-t border-gray-100 bg-white shadow-md">
+            <Wrapper>
+              <nav className="flex flex-col py-2">
+                {hamburgerNavItems.map((item, index) => (
+                  <NavLink
+                    key={index}
+                    to={item.path}
+                    end={item.end}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {({ isActive }) => (
+                      <div className="flex items-center gap-3 py-3 px-1 cursor-pointer transition duration-200">
+                        <img
+                          src={item.icon}
+                          alt={item.label}
+                          className="w-5 h-5 transition duration-200"
+                          style={{ filter: isActive ? activeFilter : "none" }}
+                        />
+                        <span
+                          className={`
+                            ${fontSize.md}
+                            ${fontWeight.normal}
+                            ${fontFamily.main}
+                            ${isActive ? "text-[#EC2614]" : "text-[#05062F]"}
+                          `}
+                        >
+                          {item.label}
+                        </span>
+                      </div>
+                    )}
+                  </NavLink>
+                ))}
+              </nav>
+            </Wrapper>
+          </div>
+        )}
       </header>
 
       {/* ── BOTTOM NAV — mobile only ── */}
