@@ -55,9 +55,9 @@ const PersonalInfo = () => {
     <div
       className={`min-h-screen bg-[#F9FAFB] flex items-center justify-center px-6 ${fontFamily.main}`}
     >
-      <div className="flex flex-col lg:flex-row items-center justify-center gap-24 lg:gap-36">
-        {/* Logo Section */}
-        <div className="flex justify-center items-center">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-36 w-full lg:w-auto">
+        
+        <div className="hidden lg:flex justify-center items-center">
           <img
             src={logo}
             alt="Cepromas Logo"
@@ -66,7 +66,8 @@ const PersonalInfo = () => {
         </div>
 
         {/* Card */}
-        <div className="bg-white w-full max-w-[520px] h-full rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-[#F1F1F1] px-13 py-5">
+        <div className="bg-white w-full max-w-[520px] h-full rounded-xl 
+        shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-[#F1F1F1] px-6 sm:px-10 py-10 my-2ky">
           {/* Heading */}
           <div className="text-center mb-10">
             <h2 className="text-[22px] font-semibold text-[#111827]">

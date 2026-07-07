@@ -21,17 +21,17 @@ const Kyc = () => {
   };
 
   return (
-    <div className={`py-10 px-10 ${fontFamily.main}`}>
-      <div className='flex items-center gap-24'>
-         {/* Left Side Logo */}
-                <div className="flex justify-center items-center">
-                  <img
-                    src={logo}
-                    alt="Cepromas Logo"
-                    className="w-64 md:w-80 lg:w-115 object-contain"
-                  />
-                </div>
-        <div className='bg-[#ffffff] w-[500px] h-[500px] shadow-[0px_25px_50px_rgba(0,0,0,0.1)] rounded-2xl py-18 px-20 border border-[#E5E7EB]'>
+    <div className={`min-h-screen bg-[#F9FAFB] flex items-center justify-center px-6 py-10 ${fontFamily.main}`}>
+      <div className='flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-24 w-full lg:w-auto'>
+         {/* Left Side Logo - hidden on mobile, same sizing as Login logo */}
+                <div className="hidden lg:flex justify-center items-center">
+  <img
+    src={logo}
+    alt="Cepromas Logo"
+    className="w-[280px] lg:w-[500px] object-contain"
+  />
+</div>
+        <div className='bg-[#ffffff] w-full max-w-[500px] lg:w-[500px] lg:h-[500px] shadow-[0px_25px_50px_rgba(0,0,0,0.1)] rounded-2xl py-10 lg:py-18 px-6 sm:px-10 lg:px-20 border border-[#E5E7EB]'>
 
           
           {step === 1 && (
@@ -95,7 +95,7 @@ const Kyc = () => {
               </div>
 
               {/* Continue Button */}
-              <div className="mt-auto">
+              <div className="mt-8 lg:mt-auto">
                 <Button
                   text="Continue"
                   bg="bg-[#06064A]"

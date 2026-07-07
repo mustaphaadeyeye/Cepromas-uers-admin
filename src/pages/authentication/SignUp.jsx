@@ -12,10 +12,10 @@ const SignUp = () => {
     <div
       className={`min-h-screen bg-[#F9FAFB] flex items-center justify-center px-6 py-6 ${fontFamily.main}`}
     >
-      <div className="flex flex-col lg:flex-row items-center justify-center gap-20 lg:gap-32">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-32 w-full lg:w-auto">
         
-        {/* Logo Section */}
-        <div className="flex justify-center items-center">
+        {/* Logo Section - hidden on mobile to save vertical space, shown on lg+ */}
+        <div className="hidden lg:flex justify-center items-center">
           <img
             src={logo}
             alt="Cepromas Logo"
