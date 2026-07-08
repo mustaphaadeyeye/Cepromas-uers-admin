@@ -39,7 +39,7 @@ const Wallet = () => {
     icon={<img src={ArrowUp} alt="arrow up" className="w-5 h-5" />}
     text="Withdraw"
     bg='bg-[#E1FBC1]'
-    width='w-[119px] md:w-full lg:w-[314px] xl:w-[314px]'
+    width='w-[185px] md:w-full lg:w-[314px] xl:w-[314px]'
     height='xl:h-[85px] lg:h-[85px] md:h-[85px] h-[38px]'
     rounded="rounded-[6px]"
   />
@@ -49,16 +49,16 @@ const Wallet = () => {
     text="Add Money"
      mobileText="Fund Wallet"
     bg='bg-[#DBE8FD]'
-    width='w-[119px] md:w-full lg:w-[314px] xl:w-[314px]'
+    width='w-[185px] md:w-full lg:w-[314px] xl:w-[314px]'
     height='xl:h-[85px] lg:h-[85px] md:h-[85px] h-[38px]'
     rounded="rounded-[6px]"
   />
-  <Link to="/wallet-interest">
+  <Link to="/app/wallet-interest" className='hidden md:block'>
     <ActionCard
       icon={<img src={ArrowChart} alt="arrow up" className="w-5 h-5" />}
       text="Interest"
       bg='bg-[#FEFAA2]'
-      width='w-[119px] md:w-full lg:w-[314px] xl:w-[314px]'
+      width='w-[185px] md:w-full lg:w-[314px] xl:w-[314px]'
       height='xl:h-[85px] lg:h-[85px] md:h-[85px] h-[38px]'
       rounded="rounded-[6px]"
     />
@@ -80,11 +80,11 @@ const Wallet = () => {
                     Transaction History
                   </h1>
         
-                  {/* Filter Icon */}
+                  {/* Filter Icon - hidden on mobile */}
                   <img
                     src={FilterIcon}
                     alt="filter icon"
-                    className='cursor-pointer '
+                    className='hidden md:block cursor-pointer '
                     onClick={() => setOpen(!open)}
                   />
         
@@ -109,8 +109,8 @@ const Wallet = () => {
                 </div>
         
                 <div>
-                  <Link to="/wallet-see-all">
-                        <p className={`${fontSize.lg} ${fontWeight.normal} ${textColor.red}`}>
+                  <Link to="/app/wallet-see-all">
+                        <p className={`${fontSize.lg} ${fontWeight.normal} lg:text-red-600 text-blue-600 md:${textColor.red}`}>
                           See all
                         </p>
                   </Link>
