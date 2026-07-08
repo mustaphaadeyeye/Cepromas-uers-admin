@@ -59,7 +59,7 @@ const RevenueOverview = () => {
     <div className='bg-white rounded-[13px] p-5 w-full'>
 
       {/* Header */}
-      <div className='flex items-center gap-70 mb-6'>
+      <div className='flex items-center lg:gap-70 gap-20 mb-6'>
         <p className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
           Revenue Overview
         </p>

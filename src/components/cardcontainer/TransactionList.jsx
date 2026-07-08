@@ -12,15 +12,38 @@ const transactions = [
 ]
 
 const TransactionRow = ({ type, amount, date, id, status, onClick }) => (
-  <div onClick={onClick} className='flex items-center justify-between px-4 py-3 border border-gray-100 rounded-xl bg-white cursor-pointer hover:bg-gray-50 transition'>
+  <div
+    onClick={onClick}
+    className='flex items-center justify-between gap-3 px-4 py-3 border border-gray-100 rounded-xl bg-white cursor-pointer hover:bg-gray-50 transition'
+  >
+    {/* Icon */}
     <div className='bg-[#FEFAA2] rounded-lg p-2 w-9 h-9 flex items-center justify-center shrink-0'>
       <img src={ListIcon} alt="list icon" />
     </div>
-    <span className={`${textColor.primary} ${fontSize.base} ${fontWeight.normal} ${fontFamily.main} w-30`}>{type}</span>
-    <span className={`${textColor.primary} ${fontSize.base} ${fontWeight.normal} ${fontFamily.main} w-30`}>{amount}</span>
-    <span className={`${textColor.primary} ${fontSize.base} ${fontWeight.normal} ${fontFamily.main} w-50`}>{date}</span>
-    <span className={`${textColor.primary} ${fontSize.base} ${fontWeight.normal} ${fontFamily.main} w-40`}>{id}</span>
-    <span className={`${textColor.primary} ${fontSize.base} ${fontWeight.normal} ${fontFamily.main}`}>{status}</span>
+
+    {/* Left group: type + date (stacked on mobile) */}
+    <div className='flex flex-col sm:flex-row sm:items-center flex-1 min-w-0 gap-0.5 sm:gap-0'>
+      <span className={`${textColor.primary} ${fontSize.base} ${fontWeight.medium} sm:${fontWeight.normal} ${fontFamily.main} sm:w-30 truncate`}>
+        {type}
+      </span>
+      <span className={`text-gray-500 sm:${textColor.primary} text-xs sm:${fontSize.base} ${fontWeight.normal} ${fontFamily.main} sm:w-50 truncate`}>
+        {date}
+      </span>
+      {/* id only shown on larger screens, matches your desktop layout */}
+      <span className={`hidden sm:inline ${textColor.primary} ${fontSize.base} ${fontWeight.normal} ${fontFamily.main} sm:w-40 truncate`}>
+        {id}
+      </span>
+    </div>
+
+    {/* Right group: amount + status (stacked, right-aligned on mobile) */}
+    <div className='flex flex-col sm:flex-row sm:items-center items-end gap-0.5 sm:gap-4 shrink-0'>
+      <span className={`${textColor.primary} ${fontSize.base} ${fontWeight.medium} sm:${fontWeight.normal} ${fontFamily.main} sm:w-30 text-right sm:text-left whitespace-nowrap`}>
+        {amount}
+      </span>
+      <span className={`text-gray-500 sm:${textColor.primary} text-xs sm:${fontSize.base} ${fontWeight.normal} ${fontFamily.main} whitespace-nowrap`}>
+        {status}
+      </span>
+    </div>
   </div>
 )
     // transaction modal

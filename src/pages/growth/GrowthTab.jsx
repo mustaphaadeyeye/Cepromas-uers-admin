@@ -25,18 +25,18 @@ const GrowthTab = () => {
 
   return (
     <div>
-      <div className={`flex justify-between items-center ${fontFamily.main}`}>
+      <div className={`flex flex-wrap justify-between items-center gap-3 ${fontFamily.main}`}>
         
-        <div className='flex items-center gap-30'>
+        <div className='flex items-center gap-6 md:gap-10 lg:gap-20'>
           
          
           <h1
             onClick={() => setActiveTab("investment")}
-            className={`cursor-pointer pb-2 transition-all duration-300
+            className={`cursor-pointer pb-2 transition-all duration-300 text-base md:text-xl lg:text-[24px]
               ${
                 activeTab === "investment"
-                  ? "text-[24px] font-semibold text-[#05062F]"
-                  : "font-normal text-[24px] text-[#05062F]"
+                  ? "font-semibold text-[#05062F]"
+                  : "font-normal text-[#05062F]"
               }`}
           >
             Current Investment
@@ -45,11 +45,11 @@ const GrowthTab = () => {
          
           <h1
             onClick={() => setActiveTab("earnings")}
-            className={`cursor-pointer pb-2 transition-all duration-300
+            className={`cursor-pointer pb-2 transition-all duration-300 text-base md:text-xl lg:text-[24px]
               ${
                 activeTab === "earnings"
-                  ? "text-[24px] font-semibold text-[#05062F]"
-                  : "font-normal text-[24px] text-[#05062F]"
+                  ? "font-semibold text-[#05062F]"
+                  : "font-normal text-[#05062F]"
               }`}
           >
             Recent Earnings
@@ -60,7 +60,7 @@ const GrowthTab = () => {
         <div>
           <p
             onClick={handleSeeAll}
-            className={`${fontSize.lg} ${fontWeight.normal} ${textColor.red} cursor-pointer`}
+            className={`${fontSize.lg} ${fontWeight.normal} ${textColor.red} cursor-pointer whitespace-nowrap lg:block hidden`}
           >
             See all
           </p>

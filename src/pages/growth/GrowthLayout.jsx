@@ -6,6 +6,12 @@ import ListIcon from "../../assets/icons/groiconm.png";
 import ActionCard from '../../components/cardcontainer/ActionCard';
 import RevenueOverview from '../../components/charts/RevenueOverview';
 import GrowthTab from './GrowthTab';
+import {
+  fontSize,
+  fontWeight,
+  textColor,
+  fontFamily,
+} from "../../components/styles/theme";
 
 
 
@@ -14,47 +20,59 @@ import GrowthTab from './GrowthTab';
 const GrowthLayout = () => {
   return (
     <Wrapper>
-        <div className='flex  gap-4 xl:flex-row lg:flex-row md:flex-col flex-col'>
-      <div className='flex flex-col gap-2'>
+      <div className='lg:hidden  block'>
+        <h1 className={`${fontFamily.main} ${fontSize.xl} ${fontWeight.bold} ${textColor.black}`}>
+          My Investment Growth
+        </h1>
+
+        <p className={`${fontFamily.main}  ${fontWeight.normal} text-[14px] ${textColor.gray500} mb-5`}>
+          Track how your investments are performing over time.
+        </p>
+      </div>
+        <div className='flex flex-col gap-4 lg:flex-row'>
+      <div className='flex flex-col gap-2 w-full'>
         <GrowthCard
-        title='Total Amount'
-        amount='₦2,500,000'
+        title='Total Investment Value'
+        amount='₦2,550,000'
         icon={Circleicon}
         />
         <GrowthCard
-        title='Total Return Value'
-        amount='₦40,000'
+        title='Total Returns Value'
+        amount='₦485,000'
         icon={ListIcon}
         />
       </div>
-      <div className='flex flex-col gap-2'>
+      <div className='flex flex-row flex-wrap gap-2 lg:flex-col lg:flex-nowrap w-full lg:w-auto'>
         <ActionCard
-        text='5 Total'
-         bg='bg-[#DBE8FD]'
-         width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-         height='h-[85px]'
-         rounded='rounded-[6px]'
-        />
-        <ActionCard
-        text='2 Ongoing'
-        bg='bg-[#FEFAA2]'
-        width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-         height='h-[85px]'
-        rounded='rounded-[6px]'
-        />
-        <ActionCard
-        text='3 Completed'
-        bg="bg-[#E1FBC1]"
-         width='w-full md:w-full lg:w-[314px] xl:w-[314px]'
-         height='h-[85px]'
-        rounded='rounded-[6px]'
-        />
+  number='5'
+  label='Total Investment'
+  bg='bg-[#DBE8FD]'
+  width='w-[31%] lg:w-[314px]'
+  height='h-[64px] lg:h-[85px]'
+  rounded='rounded-[8px] lg:rounded-[6px]'
+/>
+<ActionCard
+  number='2'
+  label='Ongoing'
+  bg='bg-[#FEFAA2]'
+  width='w-[31%] lg:w-[314px]'
+  height='h-[64px] lg:h-[85px]'
+  rounded='rounded-[8px] lg:rounded-[6px]'
+/>
+<ActionCard
+  number='3'
+  label='Completed'
+  bg="bg-[#E1FBC1]"
+  width='w-[31%] lg:w-[314px]'
+  height='h-[64px] lg:h-[85px]'
+  rounded='rounded-[8px] lg:rounded-[6px]'
+/>
       </div>
         </div>
-        <div className='mt-10'>
+        <div className='mt-6 md:mt-10'>
             <RevenueOverview/>
         </div>
-        <div className='mt-10'>
+        <div className='mt-6 md:mt-10'>
             <GrowthTab/>
         </div>
     </Wrapper>

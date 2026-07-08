@@ -71,7 +71,7 @@ const GrowthCard = () => {
 ]
   return (
     <div>
-         <div className='grid grid-cols-2 gap-4'>
+         <div className='grid xl:grid-cols-2 lg:grid-cols-2 md:grid-cols-1 grid-cols-1 gap-4'>
                 {properties.map((item) => (
                   <div
                     key={item.id}

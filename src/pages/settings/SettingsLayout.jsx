@@ -218,7 +218,7 @@ const Referrals = () => (
         style={{ background: 'linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)' }}
         className="rounded-md p-5 md:p-10 w-full xl:w-160 h-40"
       >
-        <div className='flex items-center gap-80'>
+        <div className='flex items-center justify-between'>
           <h1 className={`${fontSize.lg} ${fontWeight.normal} ${textColor.white} ${fontFamily.main}`}>
             Reward Balance
           </h1>
@@ -226,7 +226,7 @@ const Referrals = () => (
             4
           </h1>
         </div>
-        <div className='flex items-center gap-75'>
+        <div className='flex items-center justify-between'>
           <p className={`${fontSize["4xl"]} ${fontWeight.medium} ${textColor.white} ${fontFamily.main} mt-2`}>
             ₦20,000
           </p>
@@ -236,7 +236,7 @@ const Referrals = () => (
         </div>
       </div>
     </div>
-
+ 
     <div className='px-4 mt-8'>
       <p className={`${fontSize.lg} ${fontWeight.medium} ${fontFamily.main}`}>Invite and Earn</p>
       <p className={`${fontSize.lg} ${fontWeight.normal} ${fontFamily.main} ${textColor.primary} mt-1`}>
@@ -244,11 +244,11 @@ const Referrals = () => (
         Mauris adipiscing aliquam tristique integer adipiscing aliquam
       </p>
     </div>
-
+ 
     <div className='flex justify-center my-8'>
       <img src={TransferIcon} alt="" />
     </div>
-
+ 
     <div className='flex justify-center my-2'>
       <InviteCode code='jshetsnbff' />
     </div>
@@ -338,7 +338,7 @@ const SettingsLayout = () => {
     <div>
       <Wrapper>
 
-        {/*  MOBILE / TABLET (below lg)  */}
+        {/*  MOBILE / TABLET   */}
         <div className='lg:hidden'>
 
           {!mobileDetailOpen ? (
@@ -391,7 +391,7 @@ const SettingsLayout = () => {
           )}
         </div>
 
-        {/* ---------------- DESKTOP (lg and up) — unchanged ---------------- */}
+        {/* DESKTOP (lg and up)*/}
         <div className='hidden lg:flex gap-6 items-stretch'>
 
           {/* Left panel */}

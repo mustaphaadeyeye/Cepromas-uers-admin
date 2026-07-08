@@ -1,18 +1,14 @@
 import React from 'react'
 import {
-  fontSize,
   fontWeight,
-  textColor,
   fontFamily,
   textDecoration,
-  letterSpacing,
-  bgColor,
 } from "../../components/styles/theme";
 
 const ActionCard = ({
   icon,
-  text = "Action",
-  mobileText,
+  number = "0",
+  label = "Action",
   bg = "bg-[#E8F5E2]",
   textColor = "text-[#05062F]",
   width = "w-[314px]",
@@ -25,28 +21,38 @@ const ActionCard = ({
       onClick={onClick}
       className={`
         ${bg} ${width} ${height} ${rounded}
-        rounded-2xl flex items-center justify-center
-        gap-3 cursor-pointer transition duration-200 hover:opacity-90
+        rounded-2xl flex flex-col md:flex-row items-center justify-center text-center
+        gap-1 md:gap-2 px-2 cursor-pointer transition duration-200 hover:opacity-90
       `}
     >
       {icon && (
-        <span className={`${textColor} flex items-center`}>
+        <span className={`${textColor} flex items-center shrink-0`}>
           {icon}
         </span>
       )}
+
       <span
         className={`
           ${textColor}
           ${fontWeight.normal}
           ${fontFamily.main}
           ${textDecoration.none}
-          tracking-wide
-          xl:text-[18px] lg:text-[18px] md:text-[18px] text-[14px]
+          text-[18px] md:text-[22px] leading-tight
         `}
       >
-        {/* show mobileText on mobile, text on md and above */}
-        <span className="md:hidden">{mobileText || text}</span>
-        <span className="hidden md:inline">{text}</span>
+        {number}
+      </span>
+
+      <span
+        className={`
+          text-gray-500
+          ${fontWeight.normal}
+          ${fontFamily.main}
+          ${textDecoration.none}
+          text-[12px] md:text-[14px] leading-tight
+        `}
+      >
+        {label}
       </span>
     </div>
   )
