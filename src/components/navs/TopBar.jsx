@@ -3,7 +3,7 @@ import Wrapper from "../wrapper/Wrapper";
 import logoImg from "../../assets/icons/applogo.png";
 import DashImg from "../../assets/icons/myhouse.png";
 import WalletIcon from "../../assets/icons/mywallet.svg";
-import SavedIcon from "../../assets/icons/bookicon.png";
+import SavedIcon from "../../assets/icons/newsavedicon.png";
 import SettingIcon from "../../assets/icons/myset.png";
 import GrowthIcon from "../../assets/icons/mygro.png";
 // import SearchInput from "../inputs/SearchInput";
