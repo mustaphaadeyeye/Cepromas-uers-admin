@@ -313,75 +313,89 @@ const contentMap = {
 
 // Main Layout 
 const SettingsLayout = () => {
- const [active, setActive]       = useState('personal')
-  const [menuOpen, setMenuOpen]   = useState(false)
+  const [active, setActive] = useState('personal')
+  // Drives the mobile drill-down: false = menu list screen, true = detail screen for `active`
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
 
   const handleMenu = (id) => {
     if (id === 'logout') {
       setShowLogout(true)
-      setMenuOpen(false)
       return
     }
     setActive(id)
-    setMenuOpen(false)
+    setMobileDetailOpen(true)
   }
 
   const handleConfirmLogout = () => {
     setShowLogout(false)
     console.log('logged out')
-   
   }
+
+  const activeItem = menuItems.find((item) => item.id === active)
 
   return (
     <div>
       <Wrapper>
 
-        {/* Hamburger bar — mobile/md only */}
-        <div className='flex lg:hidden items-center justify-between bg-white rounded-2xl px-4 py-3 mb-4'>
-          <div className='flex items-center gap-3'>
-            <img src={ProfileImg} alt='profile' className='w-9 h-9 rounded-full object-cover' />
-            <span className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
-              John Abraham
-            </span>
-          </div>
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className='flex flex-col gap-1.5 p-2 rounded-lg hover:bg-gray-100 transition'
-          >
-            <span className={`block w-5 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-          </button>
+        {/*  MOBILE / TABLET (below lg)  */}
+        <div className='lg:hidden'>
+
+          {!mobileDetailOpen ? (
+            /* Menu list screen */
+            <div className='flex flex-col gap-6'>
+              <div className='flex flex-col items-center gap-2 mt-2'>
+                <img src={ProfileImg} alt='profile' className='w-28 h-28 rounded-full object-cover' />
+                <span className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+                  John Abraham
+                </span>
+              </div>
+
+              <div className='flex flex-col gap-6'>
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleMenu(item.id)}
+                    className='flex items-center gap-3 bg-white rounded-2xl px-5 py-4 shadow-sm text-left transition hover:bg-gray-50 cursor-pointer'
+                  >
+                    <img src={item.icon} alt={item.label} className='w-5 h-5 shrink-0' />
+                    <span className={`${fontSize.sm} ${fontWeight.normal} ${textColor.primary} ${fontFamily.main}`}>
+                      {item.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            /* Detail screen for the selected menu item */
+            <div className='flex flex-col gap-6'>
+              <div className='flex items-center gap-3'>
+                <button
+                  onClick={() => setMobileDetailOpen(false)}
+                  className='p-1 rounded-full hover:bg-gray-100 transition cursor-pointer'
+                  aria-label='Back'
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M15 18l-6-6 6-6" stroke="#05062F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <span className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}>
+                  {activeItem?.label}
+                </span>
+              </div>
+
+              <div className='bg-white rounded-2xl p-5 flex-1 flex flex-col'>
+                {contentMap[active]}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Mobile dropdown menu */}
-        {menuOpen && (
-          <div className='lg:hidden bg-white rounded-2xl p-4 mb-4 flex flex-col gap-2'>
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleMenu(item.id)}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-xl w-full text-left
-                  transition duration-200 whitespace-nowrap shadow-sm cursor-pointer
-                  ${active === item.id ? 'bg-gray-100' : 'hover:bg-gray-50'}
-                `}
-              >
-                <img src={item.icon} alt={item.label} className='w-4 h-4 shrink-0' />
-                <span className={`${fontSize.sm} ${fontWeight.normal} ${textColor.primary} ${fontFamily.main}`}>
-                  {item.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+        {/* ---------------- DESKTOP (lg and up) — unchanged ---------------- */}
+        <div className='hidden lg:flex gap-6 items-stretch'>
 
-        {/* Main layout */}
-        <div className='flex gap-6 items-stretch'>
-
-          {/* Left panel — desktop only */}
-          <div className='hidden lg:flex w-100 shrink-0 bg-white shadow-[100px_100px_100px_100px_rgba(0,0,0,0.1)] rounded-2xl p-5 flex-col items-center gap-6'>
+          {/* Left panel */}
+          <div className='flex w-100 shrink-0 bg-white shadow-[100px_100px_100px_100px_rgba(0,0,0,0.1)] rounded-2xl p-5 flex-col items-center gap-6'>
             <div className='flex flex-col items-center gap-2'>
               <div className='relative'>
                 <img src={ProfileImg} alt='profile' className='w-50 h-50 rounded-full object-cover' />
@@ -423,7 +437,8 @@ const SettingsLayout = () => {
           </div>
 
         </div>
-         {/* Logout modal */}
+
+        {/* Logout modal */}
         {showLogout && (
           <SettingsModal
             type='logout'

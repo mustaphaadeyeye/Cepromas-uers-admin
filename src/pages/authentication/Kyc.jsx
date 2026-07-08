@@ -103,7 +103,7 @@ const Kyc = () => {
                   height="h-[44px]"
                   rounded="rounded-md"
                   className="text-sm font-medium hover:opacity-90 transition text-white"
-                  onClick={() => navigate("/forgot-password")} 
+                  onClick={() => navigate("/")} 
                 />
               </div>
             </div>

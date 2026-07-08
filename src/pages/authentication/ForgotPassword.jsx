@@ -144,7 +144,7 @@ const ForgotPassword = () => {
               
 
               <button className="w-full h-12 bg-[#02024d] text-white rounded mt-10 text-sm font-medium"
-                 onClick={() => navigate("/app")}
+                 onClick={() => navigate("/")}
               >
                 Continue
               </button>

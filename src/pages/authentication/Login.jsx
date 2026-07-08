@@ -41,7 +41,7 @@ const Login = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              navigate("/signup");
+              navigate("/app");
             }}
           >
             {/* Email */}
