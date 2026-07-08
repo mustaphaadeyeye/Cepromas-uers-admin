@@ -36,7 +36,7 @@ const WalletSeeAll = () => {
                 </h1>
 
                 {/* Mobile filter tabs */}
-                <div className='flex md:hidden items-center gap-6 mt-4 overflow-x-auto'>
+                <div className='flex md:hidden justify-center gap-2 mt-4 overflow-x-auto'>
                     {filters.map((f) => (
                         <button
                             key={f}
