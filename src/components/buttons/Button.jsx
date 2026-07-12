@@ -20,7 +20,8 @@ const Button = ({
         font-medium
         transition duration-300
         hover:opacity-90
-        cursor-pointer
+        disabled:opacity-50
+        disabled:cursor-not-allowed
         ${className}
       `}
       {...props}

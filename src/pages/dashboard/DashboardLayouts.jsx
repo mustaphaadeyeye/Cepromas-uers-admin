@@ -18,42 +18,38 @@ import DashImage from "./DashImage";
 import SearchFilterTabs from "../../components/inputs/SearchFilterTabs";
 import { Link } from "react-router-dom";
 
-
-
-
 const DashboardLayouts = () => {
-  const [activeTab, setActiveTab] = useState('investments')
+  const [activeTab, setActiveTab] = useState("investments");
 
   return (
     <div>
-      <Wrapper>   
-<div>
-  
-  {/* Content */}
-  <div className="mt-6">
-    <h1
-      className={`
+      <Wrapper>
+        <div>
+          {/* Content */}
+          <div className="mt-6">
+            <h1
+              className={`
         ${fontSize["2xl"]}
         ${fontWeight.medium}
         ${textColor.primary}
         ${fontFamily.main}
       `}
-    >
-    Discover Properties & Investment Opportunities
-    </h1>
-    <div>
-      <p
-      className={`${fontFamily.main}  ${fontWeight.normal} ${fontSize.lg} ${textColor.primary} mt-4 mb-4`}
-      >
-        Whether you’re looking for a place to live or a way to invest, everything you need is in one place.
-      </p>
-    </div>
-  </div>
-</div>
+            >
+              Discover Properties & Investment Opportunities
+            </h1>
+            <div>
+              <p
+                className={`${fontFamily.main}  ${fontWeight.normal} ${fontSize.lg} ${textColor.primary} mt-4 mb-4`}
+              >
+                Whether you’re looking for a place to live or a way to invest,
+                everything you need is in one place.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* ─── TABS ─── */}
         <div className="mt-4 md:mt-5 lg:mt-5 xl:mt-5">
-
           {/* Tab headers */}
           {/* <div className="lg:flex items-center gap-20 border-b border-gray-200 mb-5  md:hidden hidden ">
 
@@ -90,7 +86,10 @@ const DashboardLayouts = () => {
           <div>
             {/* Search + Filter  */}
             <div className="block lg:hidden mb-4 xl:block md:block">
-              <SearchFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
+              <SearchFilterTabs
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+              />
             </div>
           </div>
 
@@ -118,8 +117,8 @@ const DashboardLayouts = () => {
             </div>
           )} */}
 
+          {/* <Cardbg to="/investment-description" /> */}
         </div>
-
       </Wrapper>
     </div>
   );
