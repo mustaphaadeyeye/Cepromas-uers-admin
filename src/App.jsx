@@ -23,6 +23,7 @@ import InvestmentLayout from "./pages/investment/InvestmentLayout";
 import SavedLayout from "./pages/saved/SavedLayout";
 import ChatLayout from "./pages/chat/ChatLayout";
 import RequireAuth from "./components/auth/RequireAuth";
+import PropertyDetails from "./pages/property/PropertyDetails";
 
 const App = () => {
   return (
@@ -85,7 +86,7 @@ const App = () => {
           <Route path="settings" element={<SettingsLayout />} />
           <Route path="favorites" element={<FavouriteLayout />} />
           <Route
-            path="investment-description"
+            path="investment-description/:id"
             element={<InvestmentDescription />}
           />
           <Route path="contact" element={<ContactChat />} />
@@ -98,6 +99,7 @@ const App = () => {
           <Route path="investment" element={<InvestmentLayout />} />
           <Route path="saved" element={<SavedLayout />} />
           <Route path="chat" element={<ChatLayout />} />
+          <Route path="property/:id" element={<PropertyDetails />} />
         </Route>
       </Routes>
     </>

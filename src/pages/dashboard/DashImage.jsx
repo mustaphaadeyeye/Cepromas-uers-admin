@@ -12,20 +12,42 @@ import LocationIcon from "../../assets/icons/locationicon.png";
 import Button from "../../components/buttons/Button";
 import Cicon from "../../assets/icons/cicon.png";
 
-const DashImage = ({ to, property }) => {
+const DashImage = ({ to, property, investment }) => {
   const Wrapper = to ? Link : "div";
 
-  // Fallbacks if the data hasn't fully synced or is missing keys
-  const title = property?.title || "Luxury Apartment";
-  const location = property?.location || "Unknown Location";
-  const price = property?.price
-    ? `₦${Number(property.price).toLocaleString()}`
-    : "Contact Agent";
-  const status = property?.status || "For Sale";
-  const bedrooms = property?.bedrooms || 0;
-  const bathrooms = property?.bathrooms || 0;
-  const area = property?.area ? `${property.area} sqm` : "";
-  const imageUrl = property?.images?.[0] || Bgimg; // Use first image from array if available, else static asset fallback
+  // Check if this card instance is acting as an investment or marketplace property
+  const isInvestment = !!investment;
+
+  // Bind parameters dynamically based on data source
+  const title = isInvestment
+    ? investment?.name || "Investment Package"
+    : property?.title || "Luxury Apartment";
+  const location = isInvestment
+    ? "Lagos Regional Hub"
+    : property?.location || "Unknown Location";
+
+  const price = isInvestment
+    ? `Min: ₦${Number(investment?.minAmount).toLocaleString()}`
+    : property?.price
+      ? `₦${Number(property.price).toLocaleString()}`
+      : "Contact Agent";
+
+  const status = isInvestment
+    ? investment?.status || "ACTIVE"
+    : property?.status || "For Sale";
+
+  // Custom display line depending on item structure
+  const metadataLine = isInvestment
+    ? `${investment?.durationMonths || 0} Months Maturity Cycle`
+    : `${property?.bedrooms || 0} Bedrooms, ${property?.bathrooms || 0} Bathrooms${property?.area ? `, ${property.area} sqm` : ""}`;
+
+  const ROIBadge = isInvestment
+    ? `${investment?.roi || 0}% Projected ROI`
+    : "Available";
+
+  const imageUrl = isInvestment
+    ? investment?.images?.[0] || Bgimg
+    : property?.images?.[0] || Bgimg;
 
   return (
     <div className="w-full rounded-[20px] bg-white shadow-md overflow-hidden relative transition-all duration-300 hover:shadow-lg">
@@ -57,9 +79,9 @@ const DashImage = ({ to, property }) => {
             </div>
             <div>
               <p
-                className={`${fontSize.sm} ${fontWeight.light} ${fontFamily.main} ${textColor.primary}`}
+                className={`${fontSize.sm} ${fontWeight.light} ${fontFamily.main} text-[#2540A8] font-medium`}
               >
-                Available
+                {ROIBadge}
               </p>
             </div>
           </div>
@@ -87,10 +109,9 @@ const DashImage = ({ to, property }) => {
 
           <div>
             <p
-              className={`${fontSize.sm} ${fontWeight.normal} ${fontFamily.main} ${textColor.primary}`}
+              className={`${fontSize.sm} ${fontWeight.normal} ${fontFamily.main} ${textColor.secondary} line-clamp-1`}
             >
-              {bedrooms} Bedrooms, {bathrooms} Bathrooms
-              {area ? `, ${area}` : ""}
+              {metadataLine}
             </p>
           </div>
 
@@ -99,7 +120,7 @@ const DashImage = ({ to, property }) => {
               <h2
                 className={`${fontSize.base} ${fontWeight.medium} ${fontFamily.main} ${textColor.primary}`}
               >
-                Price:
+                {isInvestment ? "Capital entry:" : "Price:"}
               </h2>
               <h1
                 className={`${fontSize["2xl"]} ${fontWeight.medium} ${fontFamily.main} text-[#2540A8]`}

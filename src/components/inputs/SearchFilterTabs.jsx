@@ -8,31 +8,34 @@ import {
   fontFamily,
   textColor,
 } from "../../components/styles/theme";
-import Cardbg from "../cardcontainer/Cardbg";
 import DashImage from "../../pages/dashboard/DashImage";
 import LocationSelect from "../../components/inputs/LocationSelect";
-// IMPORT YOUR NEW HOOK HERE
+// IMPORT BOTH GET DATA HOOKS
 import { useGetAllProperties } from "../../hooks/property/useGetAllProperties.js";
+import { useGetAllInvestments } from "../../hooks/investment/useGetAllInvestments.js";
 
 const SearchFilterTabs = ({ onTabChange }) => {
   const [activeTab, setActiveTab] = useState("investments");
   const [showFilter, setShowFilter] = useState(false);
-  const [filterType, setFilterType] = useState("");
-
-  // NEW FILTER STATES FOR BACKEND INTEGRATION
+  const [propertyStatus, setPropertyStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [propertyStatus, setPropertyStatus] = useState(""); // E.g., 'AVAILABLE', 'SOLD'
 
-  // CALLING THE GET PROPERTIES HOOK
-  // Enabled option prevents querying the endpoint if the user isn't on the properties tab
+  // HOOK 1: FETCH MARKETPLACE PROPERTIES
   const {
     data: properties,
-    isPending,
-    isError,
+    isPending: propertiesLoading,
+    isError: propertiesError,
   } = useGetAllProperties({
     search: searchQuery,
     status: propertyStatus,
   });
+
+  // HOOK 2: FETCH INVESTMENT PACKAGES
+  const {
+    data: investments,
+    isPending: investmentsLoading,
+    isError: investmentsError,
+  } = useGetAllInvestments();
 
   const handleTab = (tab) => {
     setActiveTab(tab);
@@ -85,7 +88,11 @@ const SearchFilterTabs = ({ onTabChange }) => {
           <div className="flex items-center gap-3 flex-1 w-full">
             <div className="flex-1">
               <SearchInput
-                placeholder="Search properties..."
+                placeholder={
+                  activeTab === "investments"
+                    ? "Search investments..."
+                    : "Search properties..."
+                }
                 width="xl:w-[368px] lg:w-[368px] md:w-[368px] w-full"
                 height="h-[48px]"
                 bg="bg-[#F3F4F5]"
@@ -112,16 +119,16 @@ const SearchFilterTabs = ({ onTabChange }) => {
                 <div className="absolute top-full mt-2 right-0 bg-white shadow-md rounded-[10px] p-2 w-40 z-50">
                   <p
                     onClick={() => {
-                      setPropertyStatus(""); // Clears state to see all
+                      setPropertyStatus("");
                       setShowFilter(false);
                     }}
                     className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
                   >
-                    All Properties
+                    All Items
                   </p>
                   <p
                     onClick={() => {
-                      setPropertyStatus("AVAILABLE"); // Adjust strings matching your backend enum rules
+                      setPropertyStatus("AVAILABLE");
                       setShowFilter(false);
                     }}
                     className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
@@ -160,45 +167,77 @@ const SearchFilterTabs = ({ onTabChange }) => {
         </p>
       </div>
 
-      {/* Content Section */}
+      {/* Content Grid Display Section */}
       <div className="mt-6">
+        {/* ============ INVESTMENTS TAB ACTIVE ============ */}
         {activeTab === "investments" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 lg:gap-6 xl:gap-6">
-            <Cardbg to="/app/investment-description" />
-          </div>
+          <>
+            {investmentsLoading && (
+              <p className="text-gray-500 text-center py-10">
+                Loading active funding blocks...
+              </p>
+            )}
+            {investmentsError && (
+              <p className="text-red-500 text-center py-10">
+                Failed to connect to the investment service.
+              </p>
+            )}
+            {!investmentsLoading &&
+              !investmentsError &&
+              investments?.length === 0 && (
+                <p className="text-gray-400 text-center py-10">
+                  No investment opportunities found.
+                </p>
+              )}
+            {!investmentsLoading &&
+              !investmentsError &&
+              investments?.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 lg:gap-6 xl:gap-6">
+                  {investments.map((pkg) => (
+                    <DashImage
+                      key={pkg.id}
+                      investment={pkg}
+                      to={`/app/investment-description/${pkg.id}`} // Adjust path matching your investment details view configuration
+                    />
+                  ))}
+                </div>
+              )}
+          </>
         )}
 
+        {/* ============ MARKETPLACE TAB ACTIVE ============ */}
         {activeTab === "properties" && (
           <>
-            {isPending && (
+            {propertiesLoading && (
               <p className="text-gray-500 text-center py-10">
                 Loading properties map...
               </p>
             )}
-
-            {isError && (
+            {propertiesError && (
               <p className="text-red-500 text-center py-10">
                 Something went wrong fetching properties.
               </p>
             )}
-
-            {!isPending && !isError && properties?.length === 0 && (
-              <p className="text-gray-400 text-center py-10">
-                No matching properties found.
-              </p>
-            )}
-
-            {!isPending && !isError && properties?.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 lg:gap-6 xl:gap-6">
-                {properties.map((property) => (
-                  <DashImage
-                    key={property.id}
-                    property={property}
-                    to={`/app/property/${property.id}`}
-                  />
-                ))}
-              </div>
-            )}
+            {!propertiesLoading &&
+              !propertiesError &&
+              properties?.length === 0 && (
+                <p className="text-gray-400 text-center py-10">
+                  No matching properties found.
+                </p>
+              )}
+            {!propertiesLoading &&
+              !propertiesError &&
+              properties?.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 lg:gap-6 xl:gap-6">
+                  {properties.map((property) => (
+                    <DashImage
+                      key={property.id}
+                      property={property}
+                      to={`/app/property/${property.id}`}
+                    />
+                  ))}
+                </div>
+              )}
           </>
         )}
       </div>
