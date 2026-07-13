@@ -9,3 +9,12 @@ import api from "./axios.js";
 export const getAllProperties = async (params = {}) => {
   return api.get("/properties", { params });
 };
+
+/**
+ * POST /properties/:id/favourite
+ * Toggles a property inside the user's saved list.
+ * @param {string} id - The Property ID
+ */
+export const togglePropertyFavourite = async (id) => {
+  return api.post(`/properties/${id}/favourite`);
+};

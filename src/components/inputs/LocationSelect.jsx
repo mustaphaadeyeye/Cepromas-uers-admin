@@ -1,3 +1,4 @@
+import React from "react";
 import { FiChevronDown, FiMapPin } from "react-icons/fi";
 
 const states = [
@@ -18,6 +19,7 @@ const states = [
   "FCT",
   "Gombe",
   "Imo",
+  "USA",
   "Jigawa",
   "Kaduna",
   "Kano",
@@ -40,20 +42,26 @@ const states = [
   "Zamfara",
 ];
 
-const LocationSelect = () => {
+const LocationSelect = ({ value, onChange }) => {
   return (
-    <div className="relative w-full lg:w-72">
-      <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+    <div className="relative w-full xl:w-[368px] lg:w-[368px] md:w-[368px]">
+      <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10" />
 
-      <select className="appearance-none w-full h-12 border border-gray-200 rounded-lg bg-white pl-10 pr-10 text-sm text-gray-500 outline-none">
-        <option>Location</option>
-
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="appearance-none w-full h-12 rounded-lg bg-[#F3F4F5] pl-10 pr-10 text-sm text-gray-500 outline-none border-none cursor-pointer"
+      >
+        <option value="">All Locations</option>
         {states.map((state) => (
-          <option key={state}>{state}</option>
+          // Value maps cleanly to exact casing to resolve mismatch variations
+          <option key={state} value={state}>
+            {state}
+          </option>
         ))}
       </select>
 
-      <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+      <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
     </div>
   );
 };

@@ -19,6 +19,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
   const [showFilter, setShowFilter] = useState(false);
   const [propertyStatus, setPropertyStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
 
   // HOOK 1: FETCH MARKETPLACE PROPERTIES
   const {
@@ -27,7 +28,8 @@ const SearchFilterTabs = ({ onTabChange }) => {
     isError: propertiesError,
   } = useGetAllProperties({
     search: searchQuery,
-    status: propertyStatus,
+    status: activeTab === "properties" ? propertyStatus : "",
+    location: selectedLocation, // Pass directly so state changes trigger cache updates natively
   });
 
   // HOOK 2: FETCH INVESTMENT PACKAGES
@@ -35,10 +37,17 @@ const SearchFilterTabs = ({ onTabChange }) => {
     data: investments,
     isPending: investmentsLoading,
     isError: investmentsError,
-  } = useGetAllInvestments();
+  } = useGetAllInvestments({
+    search: searchQuery,
+    location: selectedLocation, // Pass directly so state changes trigger cache updates natively
+  });
 
   const handleTab = (tab) => {
     setActiveTab(tab);
+    // Reset filters upon tab change to keep search scopes clean
+    setSearchQuery("");
+    setSelectedLocation("");
+    setPropertyStatus("");
     onTabChange && onTabChange(tab);
   };
 
@@ -84,7 +93,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
         </div>
 
         {/* Search + Filter + Location */}
-        <div className="flex items-center xl:flex-row lg:flex-row md:flex-row flex-col gap-3 w-full xl:bg-[#769AF2] xl:opacity-15 xl:p-4 rounded-[10px] order-1 md:order-2 lg:order-2 xl:order-2">
+        <div className="flex items-center xl:flex-row lg:flex-row md:flex-row flex-col gap-3 w-full xl:bg-[#F8F9FD] xl:p-4 rounded-[10px] order-1 md:order-2 lg:order-2 xl:order-2">
           <div className="flex items-center gap-3 flex-1 w-full">
             <div className="flex-1">
               <SearchInput
@@ -95,8 +104,8 @@ const SearchFilterTabs = ({ onTabChange }) => {
                 }
                 width="xl:w-[368px] lg:w-[368px] md:w-[368px] w-full"
                 height="h-[48px]"
-                bg="bg-[#F3F4F5]"
-                className="border-none"
+                bg=""
+                className="bg-white border border-gray-200"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -107,7 +116,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
                 onClick={() => setShowFilter(!showFilter)}
                 className="
                   w-[44px] h-[48px] shrink-0
-                  bg-[#F3F4F5] rounded-[10px]
+                  bg-white border border-gray-200 rounded-[10px]
                   flex items-center justify-center
                   cursor-pointer hover:opacity-80 transition
                 "
@@ -147,6 +156,8 @@ const SearchFilterTabs = ({ onTabChange }) => {
               height="h-[48px]"
               bg="bg-[#F3F4F5]"
               className="border-none"
+              value={selectedLocation}
+              onChange={(val) => setSelectedLocation(val)}
             />
           </div>
         </div>
@@ -186,7 +197,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
               !investmentsError &&
               investments?.length === 0 && (
                 <p className="text-gray-400 text-center py-10">
-                  No investment opportunities found.
+                  No investment opportunities found for your search criteria.
                 </p>
               )}
             {!investmentsLoading &&
@@ -197,7 +208,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
                     <DashImage
                       key={pkg.id}
                       investment={pkg}
-                      to={`/app/investment-description/${pkg.id}`} // Adjust path matching your investment details view configuration
+                      to={`/app/investment-description/${pkg.id}`}
                     />
                   ))}
                 </div>
@@ -222,7 +233,8 @@ const SearchFilterTabs = ({ onTabChange }) => {
               !propertiesError &&
               properties?.length === 0 && (
                 <p className="text-gray-400 text-center py-10">
-                  No matching properties found.
+                  No matching marketplace properties found for your search
+                  criteria.
                 </p>
               )}
             {!propertiesLoading &&
@@ -233,6 +245,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
                     <DashImage
                       key={property.id}
                       property={property}
+                      isFavourite={property.isFavourite} // 👈 FORWARD THE ISFAVOURITE STATE
                       to={`/app/property/${property.id}`}
                     />
                   ))}

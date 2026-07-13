@@ -1,21 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { getAllInvestments } from "../../api/investment.api";
+import api from "../../api/axios.js"; // Import your axios instance directly
 
 /**
- * Custom hook to fetch all available investment packages from the backend.
+ * Custom hook to fetch all available investment packages from the backend with dynamic filters.
+ * @param {Object} params - Contains query strings like { search: searchQuery }
  */
-export const useGetAllInvestments = () => {
+export const useGetAllInvestments = (params = {}) => {
   return useQuery({
-    queryKey: ["investments"],
+    // 1. MUST include params here so React Query watches it and refetches when you type
+    queryKey: ["investments", params],
 
     queryFn: async () => {
-      const response = await getAllInvestments();
+      // 2. Pass the params object as query parameters to your endpoint
+      const response = await api.get("/investments", { params });
 
-      // Safely handle varying axios unwrap interceptors
       const responseData = response?.data ?? response;
-
-      // Extract the target array or default to an empty list fallback
       return responseData?.data ?? responseData ?? [];
     },
 

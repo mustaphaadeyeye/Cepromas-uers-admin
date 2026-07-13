@@ -2,10 +2,11 @@ import api from "./axios.js";
 
 /**
  * GET /investments
- * List available packages
+ * List available packages with dynamic filters (search, location, category)
+ * @param {Object} params - Contains query fields like { search, location }
  */
-export const getAllInvestments = async () => {
-  return api.get("/investments");
+export const getAllInvestments = async (params = {}) => {
+  return api.get("/investments", { params }); // 👈 FIXED: Passes parameters across the network wire!
 };
 
 /**
