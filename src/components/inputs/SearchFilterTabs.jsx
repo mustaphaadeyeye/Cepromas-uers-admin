@@ -208,6 +208,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
                     <DashImage
                       key={pkg.id}
                       investment={pkg}
+                      isFavourite={pkg.isFavourite} // 👈 FIXED: Linked isFavourite dynamically here!
                       to={`/app/investment-description/${pkg.id}`}
                     />
                   ))}
@@ -245,7 +246,7 @@ const SearchFilterTabs = ({ onTabChange }) => {
                     <DashImage
                       key={property.id}
                       property={property}
-                      isFavourite={property.isFavourite} // 👈 FORWARD THE ISFAVOURITE STATE
+                      isFavourite={property.isFavourite} // 👈 ALREADY CONFIGURED
                       to={`/app/property/${property.id}`}
                     />
                   ))}

@@ -49,3 +49,12 @@ export const updateInvestment = async (id, formData) => {
 export const subscribeToInvestment = async (id, data) => {
   return api.post(`/investments/${id}/subscribe`, data);
 };
+
+/**
+ * POST /investments/{id}/favourite
+ * [User Only] Toggle an investment inside the user's saved list.
+ * @param {string} id - Investment Package ID
+ */
+export const toggleInvestmentFavourite = async (id) => {
+  return api.post(`/investments/${id}/favourite`); // 👈 ADDED ENDPOINT
+};

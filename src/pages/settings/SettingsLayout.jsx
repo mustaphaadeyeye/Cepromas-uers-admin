@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Wrapper from "../../components/wrapper/Wrapper";
 import ProfileImg from "../../assets/image/profile.png";
@@ -25,6 +25,10 @@ import Pagination from "../../components/buttons/Pagination";
 import Button from "../../components/buttons/Button";
 import { useAuthStore } from "../../stores/auth.store";
 
+// Use our profile, security and referral hooks
+import { useProfile, useUpdateProfile } from "../../hooks/profile/useProfile";
+import { useReferrals } from "../../hooks/profile/useReferrals";
+
 const menuItems = [
   { id: "personal", label: "Personal Information", icon: PersonalIcon },
   { id: "properties", label: "Managed Properties", icon: HouseIcon },
@@ -43,63 +47,68 @@ const securityItems = [
   { label: "Transaction Pin", sub: "Set transaction pin", icon: LoginPwdIcon },
 ];
 
-const personalFields = [
-  { label: "Full Name", value: "John Abraham" },
-  { label: "Email", value: "johnabraham@gmail.com" },
-  { label: "Phone Number", value: "+1-123-456-7890" },
-  { label: "Address", value: "123 Main St, Springfield, USA" },
-  { label: "Occupation", value: "Software Engineer" },
-  { label: "Nin", value: "123456789" },
-];
-
-const properties = [
-  {
-    id: 1,
-    title: "Luxury Apartments",
-    location: "Lagos",
-    amount: "₦55,000",
-    date: "January 31st, 2025",
-    roi: "30%",
-    duration: "9 months",
-    interestEarned: "₦20,000",
-    transactionId: "109928765412678",
-    rawDate: "10/09/2025",
-  },
-  {
-    id: 2,
-    title: "Luxury Apartments",
-    location: "Lagos",
-    amount: "₦55,000",
-    date: "January 31st, 2025",
-    roi: "30%",
-    duration: "9 months",
-    interestEarned: "₦20,000",
-    transactionId: "109928765412679",
-    rawDate: "10/09/2025",
-  },
-];
-
-// Personal Information
+// ==========================================================
+// 1. PERSONAL INFORMATION (Live connected with GET & PATCH)
+// ==========================================================
 const PersonalInformation = () => {
   const [editField, setEditField] = useState(null);
+  const { data: user, isLoading } = useProfile();
+  const { mutate: updateProfile, isPending } = useUpdateProfile();
+
+  // Local state to manage live field value mutations
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        fullName: user.fullName || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber || "",
+        address: user.address || "",
+        occupation: user.occupation || "",
+        nin: user.nin || "",
+      });
+    }
+  }, [user]);
+
+  if (isLoading) {
+    return (
+      <p className="text-center py-10 text-gray-500">
+        Loading your profile details...
+      </p>
+    );
+  }
+
+  const personalFields = [
+    { label: "Full Name", key: "fullName", value: formData.fullName },
+    { label: "Email", key: "email", value: formData.email },
+    { label: "Phone Number", key: "phoneNumber", value: formData.phoneNumber },
+    { label: "Address", key: "address", value: formData.address },
+    { label: "Occupation", key: "occupation", value: formData.occupation },
+    { label: "Nin", key: "nin", value: formData.nin || "Not Provided" },
+  ];
+
+  const handleSave = () => {
+    updateProfile(formData);
+  };
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2 mb-2">
         <div className="relative">
           <img
-            src={ProfileImg}
+            src={user?.faceCaptureUrl || ProfileImg}
             alt="profile"
             className="w-50 h-50 rounded-full object-cover"
           />
-          <button className="absolute bottom-5 right-10 bg-gray-200 rounded-full p-1 shadow">
+          <button className="absolute bottom-5 right-10 bg-gray-200 rounded-full p-1 shadow hover:bg-gray-300 transition cursor-pointer">
             <img src={EditIcon} alt="edit" className="w-3.5 h-3.5" />
           </button>
         </div>
         <span
           className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
         >
-          John Abraham
+          {user?.fullName}
         </span>
       </div>
 
@@ -122,7 +131,7 @@ const PersonalInformation = () => {
           </div>
           <button
             onClick={() => setEditField(field)}
-            className="p-2 rounded-full bg-gray-100 transition cursor-pointer"
+            className="p-2 rounded-full bg-gray-100 transition cursor-pointer hover:bg-gray-200"
           >
             <img src={EditIcon} alt="edit" className="w-4 h-4" />
           </button>
@@ -135,28 +144,47 @@ const PersonalInformation = () => {
           field={editField.label}
           value={editField.value}
           onClose={() => setEditField(null)}
+          onSave={(newValue) => {
+            setFormData((prev) => ({ ...prev, [editField.key]: newValue }));
+            setEditField(null);
+          }}
         />
       )}
+
       <div className="flex justify-center mt-10">
         <Button
-          text="Save"
+          text={isPending ? "Saving..." : "Save"}
           bg="bg-[#05062F]"
           width="w-[330px]"
           height="h-[50px]"
+          disabled={isPending}
           rounded="rounded-[10px]"
-          className={`
-           text-white
-            ${fontSize.md} ${fontWeight.medium} ${fontFamily.main}
-          `}
+          className={`text-white ${fontSize.md} ${fontWeight.medium} ${fontFamily.main}`}
+          onClick={handleSave}
         />
       </div>
     </div>
   );
 };
 
-//  Managed Properties
+// ==========================================================
+// 2. MANAGED PROPERTIES (Connected with user investments)
+// ==========================================================
+// Managed properties are mapped as active portfolio subscriptions!
 const ManagedProperties = () => {
   const [selectedItem, setSelectedItem] = useState(null);
+  const { data: user, isLoading } = useProfile();
+
+  if (isLoading) {
+    return (
+      <p className="text-center py-10 text-gray-500">
+        Loading your property portfolio...
+      </p>
+    );
+  }
+
+  // Fallback map if the user hasn't active property entries in database subscriptions relation
+  const activeProperties = user?.subscriptions || [];
 
   return (
     <div className="flex flex-col gap-5 py-5">
@@ -167,81 +195,97 @@ const ManagedProperties = () => {
       </p>
 
       <div className="flex flex-col gap-4">
-        {properties.map((item) => (
-          <div
-            key={item.id}
-            onClick={() => setSelectedItem(item)}
-            className="bg-white rounded-[10px] shadow border-[0.2px] border-[#CCCCCCB2] p-5 flex flex-col gap-4 cursor-pointer hover:shadow-md transition duration-200"
-          >
-            <p
-              className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
-            >
-              {item.title}
-            </p>
-
-            <div className="flex items-start justify-between">
-              <div className="flex flex-col gap-1">
-                <p
-                  className={`${fontSize.xs} ${fontWeight.medium} ${textColor.secondary} ${fontFamily.main}`}
-                >
-                  Location
-                </p>
-                <p
-                  className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
-                >
-                  {item.location}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1 text-right">
-                <p
-                  className={`${fontSize.xs} ${fontWeight.medium} ${textColor.secondary} ${fontFamily.main}`}
-                >
-                  Purchase Amount
-                </p>
-                <p
-                  className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
-                >
-                  {item.amount}
-                </p>
-              </div>
-            </div>
-
-            <div className="border-t border-gray-100" />
-
-            <div className="flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <rect
-                  x="3"
-                  y="4"
-                  width="18"
-                  height="18"
-                  rx="2"
-                  stroke="#888"
-                  strokeWidth="1.8"
-                />
-                <path
-                  d="M16 2v4M8 2v4M3 10h18"
-                  stroke="#888"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <p
-                className={`${fontSize.sm} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}
+        {activeProperties.length === 0 ? (
+          <p className="text-gray-400 text-center py-10">
+            No purchased properties in your portfolio yet.
+          </p>
+        ) : (
+          activeProperties.map((sub) => {
+            const pkg = sub.package; // Holds details of the associated package
+            return (
+              <div
+                key={sub.id}
+                onClick={() =>
+                  setSelectedItem({
+                    ...pkg,
+                    amount: `₦${Number(sub.amount).toLocaleString()}`,
+                    date: new Date(sub.startDate).toLocaleDateString(),
+                    roi: `${pkg.roi}%`,
+                    duration: `${pkg.durationMonths} months`,
+                    interestEarned: `₦${((sub.amount * pkg.roi) / 100).toLocaleString()}`,
+                    transactionId: sub.id.slice(0, 15),
+                  })
+                }
+                className="bg-white rounded-[10px] shadow border-[0.2px] border-[#CCCCCCB2] p-5 flex flex-col gap-4 cursor-pointer hover:shadow-md transition duration-200"
               >
-                Date Purchased: {item.date}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+                <p
+                  className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
+                >
+                  {pkg?.name || "Premium Real Estate Package"}
+                </p>
 
-      <div>
-        <Pagination
-          currentPage={1}
-          totalPages={3}
-          onPageChange={(page) => console.log("Go to page:", page)}
-        />
+                <div className="flex items-start justify-between">
+                  <div className="flex flex-col gap-1">
+                    <p
+                      className={`${fontSize.xs} ${fontWeight.medium} ${textColor.secondary} ${fontFamily.main}`}
+                    >
+                      Location
+                    </p>
+                    <p
+                      className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
+                    >
+                      {pkg?.location || "Lagos"}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1 text-right">
+                    <p
+                      className={`${fontSize.xs} ${fontWeight.medium} ${textColor.secondary} ${fontFamily.main}`}
+                    >
+                      Purchase Amount
+                    </p>
+                    <p
+                      className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
+                    >
+                      ₦{Number(sub.amount).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100" />
+
+                <div className="flex items-center gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <rect
+                      x="3"
+                      y="4"
+                      width="18"
+                      height="18"
+                      rx="2"
+                      stroke="#888"
+                      strokeWidth="1.8"
+                    />
+                    <path
+                      d="M16 2v4M8 2v4M3 10h18"
+                      stroke="#888"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <p
+                    className={`${fontSize.sm} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}
+                  >
+                    Date Purchased:{" "}
+                    {new Date(sub.startDate).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {selectedItem && (
@@ -255,66 +299,80 @@ const ManagedProperties = () => {
   );
 };
 
-// Referrals
-const Referrals = () => (
-  <div>
-    <div className="flex justify-center items-center flex-col">
-      <div
-        style={{
-          background: "linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)",
-        }}
-        className="rounded-md p-5 md:p-10 w-full xl:w-160 h-40"
-      >
-        <div className="flex items-center justify-between">
-          <h1
-            className={`${fontSize.lg} ${fontWeight.normal} ${textColor.white} ${fontFamily.main}`}
-          >
-            Reward Balance
-          </h1>
-          <h1
-            className={`${fontSize["4xl"]} ${fontWeight.medium} ${textColor.white} ${fontFamily.main}`}
-          >
-            4
-          </h1>
-        </div>
-        <div className="flex items-center justify-between">
-          <p
-            className={`${fontSize["4xl"]} ${fontWeight.medium} ${textColor.white} ${fontFamily.main} mt-2`}
-          >
-            ₦20,000
-          </p>
-          <p
-            className={`${fontSize.sm} ${fontWeight.normal} ${textColor.white} ${fontFamily.main} mt-2`}
-          >
-            Referrals
-          </p>
+// ==========================================================
+// 3. REFERRALS (Connected with Reward Balance & Invite Code)
+// ==========================================================
+const Referrals = () => {
+  const { data: user } = useProfile();
+  const { data: referralData, isLoading } = useReferrals();
+
+  const rewardBalance = user?.rewardBalance ?? 0;
+  const referralCount = referralData?.history?.length ?? 0;
+  const inviteCode = referralData?.referralCode || user?.referralCode || "N/A";
+
+  return (
+    <div>
+      <div className="flex justify-center items-center flex-col">
+        <div
+          style={{
+            background: "linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)",
+          }}
+          className="rounded-md p-5 md:p-10 w-full xl:w-160 h-40"
+        >
+          <div className="flex items-center justify-between">
+            <h1
+              className={`${fontSize.lg} ${fontWeight.normal} ${textColor.white} ${fontFamily.main}`}
+            >
+              Reward Balance
+            </h1>
+            <h1
+              className={`${fontSize["4xl"]} ${fontWeight.medium} ${textColor.white} ${fontFamily.main}`}
+            >
+              {referralCount}
+            </h1>
+          </div>
+          <div className="flex items-center justify-between">
+            <p
+              className={`${fontSize["4xl"]} ${fontWeight.medium} ${textColor.white} ${fontFamily.main} mt-2`}
+            >
+              ₦{Number(rewardBalance).toLocaleString()}
+            </p>
+            <p
+              className={`${fontSize.sm} ${fontWeight.normal} ${textColor.white} ${fontFamily.main} mt-2`}
+            >
+              Referrals
+            </p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div className="px-4 mt-8">
-      <p className={`${fontSize.lg} ${fontWeight.medium} ${fontFamily.main}`}>
-        Invite and Earn
-      </p>
-      <p
-        className={`${fontSize.lg} ${fontWeight.normal} ${fontFamily.main} ${textColor.primary} mt-1`}
-      >
-        Mauris adipiscing aliquam tristique integer adipiscing aliqu Mauris
-        adipiscing aliquam tristique integer adipiscing aliquam
-      </p>
-    </div>
+      <div className="px-4 mt-8">
+        <p className={`${fontSize.lg} ${fontWeight.medium} ${fontFamily.main}`}>
+          Invite and Earn
+        </p>
+        <p
+          className={`${fontSize.lg} ${fontWeight.normal} ${fontFamily.main} ${textColor.primary} mt-1`}
+        >
+          Share your referral invite link with friends and receive reward
+          bonuses instantly inside your balance wallet upon their sign-up
+          verification check!
+        </p>
+      </div>
 
-    <div className="flex justify-center my-8">
-      <img src={TransferIcon} alt="" />
-    </div>
+      <div className="flex justify-center my-8">
+        <img src={TransferIcon} alt="" />
+      </div>
 
-    <div className="flex justify-center my-2">
-      <InviteCode code="jshetsnbff" />
+      <div className="flex justify-center my-2">
+        <InviteCode code={inviteCode} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-//  Security
+// ==========================================================
+// 4. SECURITY & MODALS (Binds custom handlers down to Modal inputs)
+// ==========================================================
 const Security = () => {
   const [securityModal, setSecurityModal] = useState(null);
 
@@ -339,7 +397,7 @@ const Security = () => {
           </div>
           <button
             onClick={() => setSecurityModal(item.label)}
-            className="p-2 rounded-lg transition cursor-pointer"
+            className="p-2 rounded-lg transition cursor-pointer hover:bg-gray-50"
           >
             <img src={item.icon} alt={item.label} />
           </button>
@@ -380,11 +438,11 @@ const contentMap = {
 // Main Layout
 const SettingsLayout = () => {
   const [active, setActive] = useState("personal");
-  // Drives the mobile drill-down: false = menu list screen, true = detail screen for `active`
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
+  const { data: user } = useProfile();
 
   const handleMenu = (id) => {
     if (id === "logout") {
@@ -413,14 +471,14 @@ const SettingsLayout = () => {
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center gap-2 mt-2">
                 <img
-                  src={ProfileImg}
+                  src={user?.faceCaptureUrl || ProfileImg}
                   alt="profile"
                   className="w-28 h-28 rounded-full object-cover"
                 />
                 <span
                   className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
                 >
-                  John Abraham
+                  {user?.fullName || "Loading..."}
                 </span>
               </div>
 
@@ -485,18 +543,18 @@ const SettingsLayout = () => {
             <div className="flex flex-col items-center gap-2">
               <div className="relative">
                 <img
-                  src={ProfileImg}
+                  src={user?.faceCaptureUrl || ProfileImg}
                   alt="profile"
                   className="w-50 h-50 rounded-full object-cover"
                 />
-                <button className="absolute bottom-5 right-10 bg-white rounded-full p-1 shadow">
+                <button className="absolute bottom-5 right-10 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition">
                   <img src={EditIcon} alt="edit" className="w-3.5 h-3.5" />
                 </button>
               </div>
               <span
                 className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
               >
-                John Abraham
+                {user?.fullName || "Loading..."}
               </span>
             </div>
 

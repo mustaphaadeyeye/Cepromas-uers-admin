@@ -11,7 +11,8 @@ import { Link } from "react-router-dom";
 import LocationIcon from "../../assets/icons/locationicon.png";
 import Button from "../../components/buttons/Button";
 import Cicon from "../../assets/icons/cicon.png";
-import { useToggleFavourite } from "../../hooks/property/useToggleFavourite"; // 👈 IMPORT TOGGLE HOOK
+import { useToggleFavourite } from "../../hooks/property/useToggleFavourite"; // Properties toggle hook
+import { useToggleInvestmentFavourite } from "../../hooks/investment/useToggleInvestmentFavourite"; // 👈 ADDED: Investments toggle hook
 
 const DashImage = ({ to, property, investment, isFavourite = false }) => {
   const Wrapper = to ? Link : "div";
@@ -19,39 +20,73 @@ const DashImage = ({ to, property, investment, isFavourite = false }) => {
   // Check if this card instance is acting as an investment or marketplace property
   const isInvestment = !!investment;
 
-  // 1. Sync properties database value with optimistic local rendering state
+  // 1. Sync database value with optimistic local rendering state
   const [localIsFavourite, setLocalIsFavourite] = useState(isFavourite);
-  const { mutate: toggleFav, isPending } = useToggleFavourite();
+
+  // 2. Instantiate BOTH toggle mutations
+  const { mutate: togglePropFav, isPending: propPending } =
+    useToggleFavourite();
+  const { mutate: toggleInvestFav, isPending: investPending } =
+    useToggleInvestmentFavourite();
+
+  const isPending = propPending || investPending;
 
   useEffect(() => {
     setLocalIsFavourite(isFavourite);
   }, [isFavourite]);
 
-  // 2. Prevent card link navigation and toggle favorites cleanly
+  // 3. Prevent card link navigation and toggle favorites cleanly based on context
   const handleFavouriteClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Safety guards
-    if (isInvestment) return;
-    const propertyId = property?.id;
-    if (!propertyId || isPending) return;
+    if (isPending) return;
 
-    // Optimistically toggle state locally
-    setLocalIsFavourite((prev) => !prev);
+    if (isInvestment) {
+      const investmentId = investment?.id;
+      if (!investmentId) return;
 
-    toggleFav(propertyId, {
-      onSuccess: (response) => {
-        const data = response?.data ?? response;
-        if (data && typeof data.isFavourite === "boolean") {
-          setLocalIsFavourite(data.isFavourite);
-        }
-      },
-      onError: (err) => {
-        console.error("❌ Failed to save favorite status, rolling back:", err);
-        setLocalIsFavourite(isFavourite); // Rollback state
-      },
-    });
+      // Optimistically toggle state locally
+      setLocalIsFavourite((prev) => !prev);
+
+      toggleInvestFav(investmentId, {
+        onSuccess: (response) => {
+          const data = response?.data ?? response;
+          if (data && typeof data.isFavourite === "boolean") {
+            setLocalIsFavourite(data.isFavourite);
+          }
+        },
+        onError: (err) => {
+          console.error(
+            "❌ Failed to save investment favorite status, rolling back:",
+            err,
+          );
+          setLocalIsFavourite(isFavourite); // Rollback state
+        },
+      });
+    } else {
+      const propertyId = property?.id;
+      if (!propertyId) return;
+
+      // Optimistically toggle state locally
+      setLocalIsFavourite((prev) => !prev);
+
+      togglePropFav(propertyId, {
+        onSuccess: (response) => {
+          const data = response?.data ?? response;
+          if (data && typeof data.isFavourite === "boolean") {
+            setLocalIsFavourite(data.isFavourite);
+          }
+        },
+        onError: (err) => {
+          console.error(
+            "❌ Failed to save property favorite status, rolling back:",
+            err,
+          );
+          setLocalIsFavourite(isFavourite); // Rollback state
+        },
+      });
+    }
   };
 
   // Bind parameters dynamically based on data source
@@ -87,27 +122,25 @@ const DashImage = ({ to, property, investment, isFavourite = false }) => {
 
   return (
     <div className="w-full rounded-[20px] bg-white shadow-md overflow-hidden relative transition-all duration-300 hover:shadow-lg">
-      {/* 3. Render heart button strictly for properties, keeping investments clean */}
-      {!isInvestment && (
-        <button
-          type="button"
-          onClick={handleFavouriteClick}
-          disabled={isPending}
-          className={`absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm z-50 transition-all duration-300 transform active:scale-95 ${
-            localIsFavourite
-              ? "bg-red-500 text-white"
-              : "bg-white text-gray-400 opacity-90 hover:opacity-100"
+      {/* 4. FIXED: Always render the button wrapper container for both Properties and Investments! */}
+      <button
+        type="button"
+        onClick={handleFavouriteClick}
+        disabled={isPending}
+        className={`absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-md z-50 transition-all duration-300 transform active:scale-95 ${
+          localIsFavourite
+            ? "bg-red-500 text-white"
+            : "bg-white text-gray-400 opacity-90 hover:opacity-100"
+        }`}
+      >
+        <img
+          src={Cicon}
+          alt="heart status"
+          className={`pointer-events-none transition-all duration-300 ${
+            localIsFavourite ? "brightness-0 invert scale-110" : "opacity-75"
           }`}
-        >
-          <img
-            src={Cicon}
-            alt="heart status"
-            className={`pointer-events-none transition-all duration-300 ${
-              localIsFavourite ? "brightness-0 invert scale-110" : "opacity-75"
-            }`}
-          />
-        </button>
-      )}
+        />
+      </button>
 
       <Wrapper {...(to ? { to } : {})}>
         <img
