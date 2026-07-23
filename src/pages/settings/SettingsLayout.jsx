@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Wrapper from "../../components/wrapper/Wrapper";
 import ProfileImg from "../../assets/image/profile.png";
@@ -24,9 +24,15 @@ import ContactChat from "../../components/chatandconditions/ContactChat";
 import Pagination from "../../components/buttons/Pagination";
 import Button from "../../components/buttons/Button";
 import { useAuthStore } from "../../stores/auth.store";
+import toast from "react-hot-toast";
 
 // Use our profile, security and referral hooks
 import { useProfile, useUpdateProfile } from "../../hooks/profile/useProfile";
+
+import {
+  useChangePassword,
+  useSetTransactionPin,
+} from "../../hooks/profile/useSecurity";
 import { useReferrals } from "../../hooks/profile/useReferrals";
 
 const menuItems = [
@@ -48,15 +54,26 @@ const securityItems = [
 ];
 
 // ==========================================================
-// 1. PERSONAL INFORMATION (Live connected with GET & PATCH)
+// 1. PERSONAL INFORMATION (Instant Backend Sync + Avatar Upload)
 // ==========================================================
 const PersonalInformation = () => {
   const [editField, setEditField] = useState(null);
   const { data: user, isLoading } = useProfile();
   const { mutate: updateProfile, isPending } = useUpdateProfile();
 
+  // Hidden File Input Ref for Avatar Uploads
+  const avatarInputRef = useRef(null);
+
   // Local state to manage live field value mutations
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    occupation: "",
+    nin: "",
+    state: "",
+  });
 
   useEffect(() => {
     if (user) {
@@ -67,9 +84,39 @@ const PersonalInformation = () => {
         address: user.address || "",
         occupation: user.occupation || "",
         nin: user.nin || "",
+        state: user.state || "",
       });
     }
   }, [user]);
+
+  // Handle avatar file selection & multipart form submission
+  const handleAvatarFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file.");
+      return;
+    }
+
+    // Build multipart/form-data payload with 'file' key
+    const payload = new FormData();
+    payload.append("file", file);
+
+    const toastId = toast.loading("Uploading new profile image...");
+
+    updateProfile(payload, {
+      onSuccess: () => {
+        toast.success("Profile image updated successfully!", { id: toastId });
+        // Reset file input value so re-selecting same image works
+        if (avatarInputRef.current) avatarInputRef.current.value = "";
+      },
+      onError: (err) => {
+        const msg = err.response?.data?.message || "Failed to upload image.";
+        toast.error(msg, { id: toastId });
+      },
+    });
+  };
 
   if (isLoading) {
     return (
@@ -81,27 +128,59 @@ const PersonalInformation = () => {
 
   const personalFields = [
     { label: "Full Name", key: "fullName", value: formData.fullName },
-    { label: "Email", key: "email", value: formData.email },
+    { label: "Email", key: "email", value: formData.email, readonly: true },
     { label: "Phone Number", key: "phoneNumber", value: formData.phoneNumber },
     { label: "Address", key: "address", value: formData.address },
     { label: "Occupation", key: "occupation", value: formData.occupation },
-    { label: "Nin", key: "nin", value: formData.nin || "Not Provided" },
+    { label: "NIN", key: "nin", value: formData.nin || "Not Provided" },
   ];
 
-  const handleSave = () => {
-    updateProfile(formData);
+  // Triggers API patch call directly for JSON field updates
+  const handleDirectUpdate = (updatedPayload) => {
+    updateProfile(updatedPayload, {
+      onSuccess: () => {
+        setEditField(null);
+      },
+    });
+  };
+
+  const handleSaveAll = () => {
+    const payload = {
+      fullName: formData.fullName,
+      phoneNumber: formData.phoneNumber,
+      address: formData.address,
+      occupation: formData.occupation,
+      nin: formData.nin,
+      state: formData.state,
+    };
+    updateProfile(payload);
   };
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Hidden Avatar File Input */}
+      <input
+        type="file"
+        ref={avatarInputRef}
+        onChange={handleAvatarFileChange}
+        accept="image/*"
+        className="hidden"
+      />
+
       <div className="flex flex-col items-center gap-2 mb-2">
         <div className="relative">
           <img
             src={user?.faceCaptureUrl || ProfileImg}
             alt="profile"
-            className="w-50 h-50 rounded-full object-cover"
+            className="w-50 h-50 rounded-full object-cover border-2 border-gray-100 shadow-sm"
           />
-          <button className="absolute bottom-5 right-10 bg-gray-200 rounded-full p-1 shadow hover:bg-gray-300 transition cursor-pointer">
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={isPending}
+            className="absolute bottom-5 right-10 bg-gray-200 rounded-full p-1.5 shadow hover:bg-gray-300 transition cursor-pointer disabled:opacity-50"
+            title="Change Profile Photo"
+          >
             <img src={EditIcon} alt="edit" className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -129,24 +208,28 @@ const PersonalInformation = () => {
               {field.value}
             </span>
           </div>
-          <button
-            onClick={() => setEditField(field)}
-            className="p-2 rounded-full bg-gray-100 transition cursor-pointer hover:bg-gray-200"
-          >
-            <img src={EditIcon} alt="edit" className="w-4 h-4" />
-          </button>
+          {!field.readonly && (
+            <button
+              onClick={() => setEditField(field)}
+              className="p-2 rounded-full bg-gray-100 transition cursor-pointer hover:bg-gray-200"
+            >
+              <img src={EditIcon} alt="edit" className="w-4 h-4" />
+            </button>
+          )}
         </div>
       ))}
 
+      {/* Directly submits field change to NestJS when Save is clicked inside Modal */}
       {editField && (
         <SettingsModal
           type="details"
           field={editField.label}
           value={editField.value}
+          isPending={isPending}
           onClose={() => setEditField(null)}
           onSave={(newValue) => {
             setFormData((prev) => ({ ...prev, [editField.key]: newValue }));
-            setEditField(null);
+            handleDirectUpdate({ [editField.key]: newValue });
           }}
         />
       )}
@@ -160,7 +243,7 @@ const PersonalInformation = () => {
           disabled={isPending}
           rounded="rounded-[10px]"
           className={`text-white ${fontSize.md} ${fontWeight.medium} ${fontFamily.main}`}
-          onClick={handleSave}
+          onClick={handleSaveAll}
         />
       </div>
     </div>
@@ -168,9 +251,8 @@ const PersonalInformation = () => {
 };
 
 // ==========================================================
-// 2. MANAGED PROPERTIES (Connected with user investments)
+// 2. MANAGED PROPERTIES
 // ==========================================================
-// Managed properties are mapped as active portfolio subscriptions!
 const ManagedProperties = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const { data: user, isLoading } = useProfile();
@@ -183,7 +265,6 @@ const ManagedProperties = () => {
     );
   }
 
-  // Fallback map if the user hasn't active property entries in database subscriptions relation
   const activeProperties = user?.subscriptions || [];
 
   return (
@@ -201,7 +282,7 @@ const ManagedProperties = () => {
           </p>
         ) : (
           activeProperties.map((sub) => {
-            const pkg = sub.package; // Holds details of the associated package
+            const pkg = sub.package;
             return (
               <div
                 key={sub.id}
@@ -210,9 +291,9 @@ const ManagedProperties = () => {
                     ...pkg,
                     amount: `₦${Number(sub.amount).toLocaleString()}`,
                     date: new Date(sub.startDate).toLocaleDateString(),
-                    roi: `${pkg.roi}%`,
-                    duration: `${pkg.durationMonths} months`,
-                    interestEarned: `₦${((sub.amount * pkg.roi) / 100).toLocaleString()}`,
+                    roi: `${pkg?.roi || 0}%`,
+                    duration: `${pkg?.durationMonths || 0} months`,
+                    interestEarned: `₦${(((sub.amount || 0) * (pkg?.roi || 0)) / 100).toLocaleString()}`,
                     transactionId: sub.id.slice(0, 15),
                   })
                 }
@@ -300,15 +381,15 @@ const ManagedProperties = () => {
 };
 
 // ==========================================================
-// 3. REFERRALS (Connected with Reward Balance & Invite Code)
+// 3. REFERRALS
 // ==========================================================
 const Referrals = () => {
   const { data: user } = useProfile();
-  const { data: referralData, isLoading } = useReferrals();
+  const { data: referralData } = useReferrals();
 
-  const rewardBalance = user?.rewardBalance ?? 0;
-  const referralCount = referralData?.history?.length ?? 0;
-  const inviteCode = referralData?.referralCode || user?.referralCode || "N/A";
+  const rewardBalance = referralData?.rewardBalance ?? user?.rewardBalance ?? 0;
+  const referralCount = referralData?.numberOfReferrals ?? 0;
+  const inviteCode = referralData?.inviteCode || user?.referralCode || "N/A";
 
   return (
     <div>
@@ -371,10 +452,13 @@ const Referrals = () => {
 };
 
 // ==========================================================
-// 4. SECURITY & MODALS (Binds custom handlers down to Modal inputs)
+// 4. SECURITY & MODALS
 // ==========================================================
 const Security = () => {
   const [securityModal, setSecurityModal] = useState(null);
+  const { mutate: changePassword, isPending: passwordPending } =
+    useChangePassword();
+  const { mutate: setPin, isPending: pinPending } = useSetTransactionPin();
 
   return (
     <div className="flex flex-col gap-5 xl:px-12 lg:px-8 md:px-4 px-2">
@@ -409,10 +493,29 @@ const Security = () => {
       </div>
 
       {securityModal === "Login Password" && (
-        <SettingsModal type="password" onClose={() => setSecurityModal(null)} />
+        <SettingsModal
+          type="password"
+          isPending={passwordPending}
+          onClose={() => setSecurityModal(null)}
+          onSubmitPassword={(dto) => {
+            changePassword(dto, {
+              onSuccess: () => setSecurityModal(null),
+            });
+          }}
+        />
       )}
+
       {securityModal === "Transaction Pin" && (
-        <SettingsModal type="pin" onClose={() => setSecurityModal(null)} />
+        <SettingsModal
+          type="pin"
+          isPending={pinPending}
+          onClose={() => setSecurityModal(null)}
+          onSubmitPin={(dto) => {
+            setPin(dto, {
+              onSuccess: () => setSecurityModal(null),
+            });
+          }}
+        />
       )}
     </div>
   );
@@ -443,6 +546,11 @@ const SettingsLayout = () => {
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
   const { data: user } = useProfile();
+  const { mutate: updateProfile, isPending: isAvatarPending } =
+    useUpdateProfile();
+
+  // Avatar upload ref for left-panel avatar
+  const panelAvatarInputRef = useRef(null);
 
   const handleMenu = (id) => {
     if (id === "logout") {
@@ -459,22 +567,66 @@ const SettingsLayout = () => {
     navigate("/", { replace: true });
   };
 
+  const handlePanelAvatarFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file.");
+      return;
+    }
+
+    const payload = new FormData();
+    payload.append("file", file);
+
+    const toastId = toast.loading("Uploading new profile image...");
+
+    updateProfile(payload, {
+      onSuccess: () => {
+        toast.success("Profile image updated successfully!", { id: toastId });
+        if (panelAvatarInputRef.current) panelAvatarInputRef.current.value = "";
+      },
+      onError: (err) => {
+        const msg = err.response?.data?.message || "Failed to upload image.";
+        toast.error(msg, { id: toastId });
+      },
+    });
+  };
+
   const activeItem = menuItems.find((item) => item.id === active);
 
   return (
     <div>
+      {/* Hidden file input for desktop/mobile side panel avatar edit */}
+      <input
+        type="file"
+        ref={panelAvatarInputRef}
+        onChange={handlePanelAvatarFileChange}
+        accept="image/*"
+        className="hidden"
+      />
+
       <Wrapper>
-        {/*  MOBILE / TABLET   */}
+        {/* MOBILE / TABLET */}
         <div className="lg:hidden">
           {!mobileDetailOpen ? (
             /* Menu list screen */
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center gap-2 mt-2">
-                <img
-                  src={user?.faceCaptureUrl || ProfileImg}
-                  alt="profile"
-                  className="w-28 h-28 rounded-full object-cover"
-                />
+                <div className="relative">
+                  <img
+                    src={user?.faceCaptureUrl || ProfileImg}
+                    alt="profile"
+                    className="w-28 h-28 rounded-full object-cover border border-gray-100"
+                  />
+                  <button
+                    onClick={() => panelAvatarInputRef.current?.click()}
+                    disabled={isAvatarPending}
+                    className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition cursor-pointer disabled:opacity-50"
+                  >
+                    <img src={EditIcon} alt="edit" className="w-3.5 h-3.5" />
+                  </button>
+                </div>
                 <span
                   className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
                 >
@@ -536,7 +688,7 @@ const SettingsLayout = () => {
           )}
         </div>
 
-        {/* DESKTOP (lg and up)*/}
+        {/* DESKTOP (lg and up) */}
         <div className="hidden lg:flex gap-6 items-stretch">
           {/* Left panel */}
           <div className="flex w-100 shrink-0 bg-white shadow-[100px_100px_100px_100px_rgba(0,0,0,0.1)] rounded-2xl p-5 flex-col items-center gap-6">
@@ -545,9 +697,14 @@ const SettingsLayout = () => {
                 <img
                   src={user?.faceCaptureUrl || ProfileImg}
                   alt="profile"
-                  className="w-50 h-50 rounded-full object-cover"
+                  className="w-50 h-50 rounded-full object-cover border border-gray-100"
                 />
-                <button className="absolute bottom-5 right-10 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition">
+                <button
+                  onClick={() => panelAvatarInputRef.current?.click()}
+                  disabled={isAvatarPending}
+                  className="absolute bottom-5 right-10 bg-white rounded-full p-1.5 shadow hover:bg-gray-100 transition cursor-pointer disabled:opacity-50"
+                  title="Change Profile Photo"
+                >
                   <img src={EditIcon} alt="edit" className="w-3.5 h-3.5" />
                 </button>
               </div>
