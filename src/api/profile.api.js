@@ -30,20 +30,19 @@ export const getReferrals = async () => {
   return response?.data ?? response;
 };
 
-// POST /profile/kyc
 export const submitKyc = async (data) => {
-  const response = await api.post("/profile/kyc", data);
+  const headers =
+    data instanceof FormData ? { "Content-Type": "multipart/form-data" } : {};
+  const response = await api.post("/profile/kyc", data, { headers });
   return response?.data ?? response;
 };
 
-// GET /profile/kyc
 export const getKycStatus = async () => {
   const response = await api.get("/profile/kyc");
   return response?.data ?? response;
 };
 
-// POST /profile/kyc/verify-nin
-export const verifyNin = async (data) => {
-  const response = await api.post("/profile/kyc/verify-nin", data);
+export const verifyNin = async () => {
+  const response = await api.post("/profile/kyc/verify-nin");
   return response?.data ?? response;
 };

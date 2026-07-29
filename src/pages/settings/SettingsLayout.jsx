@@ -21,19 +21,18 @@ import LoginPwdIcon from "../../assets/icons/LoginPwd.png";
 import SettingsModal from "../../components/modals/SettingsModal";
 import SecurityBgIcon from "../../assets/icons/securityicon.png";
 import ContactChat from "../../components/chatandconditions/ContactChat";
-import Pagination from "../../components/buttons/Pagination";
 import Button from "../../components/buttons/Button";
 import { useAuthStore } from "../../stores/auth.store";
 import toast from "react-hot-toast";
 
-// Use our profile, security and referral hooks
+// Hooks
 import { useProfile, useUpdateProfile } from "../../hooks/profile/useProfile";
-
 import {
   useChangePassword,
   useSetTransactionPin,
 } from "../../hooks/profile/useSecurity";
 import { useReferrals } from "../../hooks/profile/useReferrals";
+import { useSubmitKyc } from "../../hooks/profile/useKyc";
 
 const menuItems = [
   { id: "personal", label: "Personal Information", icon: PersonalIcon },
@@ -54,17 +53,20 @@ const securityItems = [
 ];
 
 // ==========================================================
-// 1. PERSONAL INFORMATION (Instant Backend Sync + Avatar Upload)
+// 1. PERSONAL INFORMATION (Includes KYC Status Badge + Modal)
 // ==========================================================
 const PersonalInformation = () => {
   const [editField, setEditField] = useState(null);
+  const [kycModalOpen, setKycModalOpen] = useState(false);
+  const [kycNin, setKycNin] = useState("");
+  const [kycFile, setKycFile] = useState(null);
+
   const { data: user, isLoading } = useProfile();
   const { mutate: updateProfile, isPending } = useUpdateProfile();
+  const { mutate: submitKyc, isPending: isKycSubmitting } = useSubmitKyc();
 
-  // Hidden File Input Ref for Avatar Uploads
   const avatarInputRef = useRef(null);
 
-  // Local state to manage live field value mutations
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -86,10 +88,10 @@ const PersonalInformation = () => {
         nin: user.nin || "",
         state: user.state || "",
       });
+      if (user.nin) setKycNin(user.nin);
     }
   }, [user]);
 
-  // Handle avatar file selection & multipart form submission
   const handleAvatarFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -99,7 +101,6 @@ const PersonalInformation = () => {
       return;
     }
 
-    // Build multipart/form-data payload with 'file' key
     const payload = new FormData();
     payload.append("file", file);
 
@@ -108,12 +109,30 @@ const PersonalInformation = () => {
     updateProfile(payload, {
       onSuccess: () => {
         toast.success("Profile image updated successfully!", { id: toastId });
-        // Reset file input value so re-selecting same image works
         if (avatarInputRef.current) avatarInputRef.current.value = "";
       },
       onError: (err) => {
         const msg = err.response?.data?.message || "Failed to upload image.";
         toast.error(msg, { id: toastId });
+      },
+    });
+  };
+
+  const handleKycSubmit = (e) => {
+    e.preventDefault();
+    if (!kycNin || kycNin.length !== 11) {
+      toast.error("Please enter a valid 11-digit NIN.");
+      return;
+    }
+
+    const payload = new FormData();
+    payload.append("nin", kycNin);
+    if (kycFile) payload.append("file", kycFile);
+
+    submitKyc(payload, {
+      onSuccess: () => {
+        setKycModalOpen(false);
+        setKycFile(null);
       },
     });
   };
@@ -126,16 +145,46 @@ const PersonalInformation = () => {
     );
   }
 
+  // Determine KYC Badge Display
+  const isKycVerified = user?.isKycVerified;
+  const kycStatus =
+    user?.kycStatus || (isKycVerified ? "VERIFIED" : "UNVERIFIED");
+
   const personalFields = [
     { label: "Full Name", key: "fullName", value: formData.fullName },
     { label: "Email", key: "email", value: formData.email, readonly: true },
     { label: "Phone Number", key: "phoneNumber", value: formData.phoneNumber },
     { label: "Address", key: "address", value: formData.address },
     { label: "Occupation", key: "occupation", value: formData.occupation },
-    { label: "NIN", key: "nin", value: formData.nin || "Not Provided" },
+    {
+      label: "NIN / KYC Status",
+      key: "nin",
+      value: (
+        <div className="flex items-center gap-2">
+          <span>{formData.nin || "Not Provided"}</span>
+          {isKycVerified ? (
+            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              ✓ Verified
+            </span>
+          ) : kycStatus === "PENDING" ? (
+            <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              ⏳ Verification Pending
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setKycModalOpen(true)}
+              className="bg-red-100 text-red-600 hover:bg-red-200 text-xs font-bold px-2.5 py-0.5 rounded-full transition cursor-pointer"
+            >
+              Verify KYC Now
+            </button>
+          )}
+        </div>
+      ),
+      readonly: true,
+    },
   ];
 
-  // Triggers API patch call directly for JSON field updates
   const handleDirectUpdate = (updatedPayload) => {
     updateProfile(updatedPayload, {
       onSuccess: () => {
@@ -158,7 +207,6 @@ const PersonalInformation = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Hidden Avatar File Input */}
       <input
         type="file"
         ref={avatarInputRef}
@@ -172,16 +220,16 @@ const PersonalInformation = () => {
           <img
             src={user?.faceCaptureUrl || ProfileImg}
             alt="profile"
-            className="w-50 h-50 rounded-full object-cover border-2 border-gray-100 shadow-sm"
+            className="w-40 h-40 rounded-full object-cover border-2 border-gray-100 shadow-sm"
           />
           <button
             type="button"
             onClick={() => avatarInputRef.current?.click()}
             disabled={isPending}
-            className="absolute bottom-5 right-10 bg-gray-200 rounded-full p-1.5 shadow hover:bg-gray-300 transition cursor-pointer disabled:opacity-50"
+            className="absolute bottom-2 right-2 bg-gray-200 rounded-full p-2 shadow hover:bg-gray-300 transition cursor-pointer disabled:opacity-50"
             title="Change Profile Photo"
           >
-            <img src={EditIcon} alt="edit" className="w-3.5 h-3.5" />
+            <img src={EditIcon} alt="edit" className="w-4 h-4" />
           </button>
         </div>
         <span
@@ -194,7 +242,7 @@ const PersonalInformation = () => {
       {personalFields.map((field) => (
         <div
           key={field.label}
-          className="flex items-start justify-between border-b border-gray-100 pb-4"
+          className="flex items-center justify-between border-b border-gray-100 pb-4"
         >
           <div className="flex flex-col gap-1">
             <span
@@ -202,11 +250,11 @@ const PersonalInformation = () => {
             >
               {field.label}
             </span>
-            <span
+            <div
               className={`${fontSize.sm} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}
             >
               {field.value}
-            </span>
+            </div>
           </div>
           {!field.readonly && (
             <button
@@ -219,7 +267,6 @@ const PersonalInformation = () => {
         </div>
       ))}
 
-      {/* Directly submits field change to NestJS when Save is clicked inside Modal */}
       {editField && (
         <SettingsModal
           type="details"
@@ -234,7 +281,74 @@ const PersonalInformation = () => {
         />
       )}
 
-      <div className="flex justify-center mt-10">
+      {/* KYC SUBMISSION MODAL */}
+      {kycModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
+          <div className="bg-white rounded-[20px] p-6 w-full max-w-md flex flex-col gap-4 relative shadow-2xl">
+            <button
+              onClick={() => setKycModalOpen(false)}
+              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:bg-gray-50"
+            >
+              ✕
+            </button>
+
+            <h2 className="text-xl font-bold text-[#05062F] text-center">
+              KYC Verification
+            </h2>
+            <p className="text-xs text-gray-500 text-center -mt-2">
+              Submit your National Identification Number (NIN) to unlock
+              investment packages.
+            </p>
+
+            <form
+              onSubmit={handleKycSubmit}
+              className="flex flex-col gap-4 mt-2"
+            >
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-[#05062F]">
+                  NIN (11 Digits)
+                </label>
+                <input
+                  type="text"
+                  maxLength={11}
+                  required
+                  placeholder="e.g. 12345678901"
+                  value={kycNin}
+                  onChange={(e) => setKycNin(e.target.value)}
+                  className="border border-gray-200 rounded-xl px-4 h-11 text-sm outline-none focus:border-[#05062F]"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-[#05062F]">
+                  Upload Selfie / Document Image (Optional)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setKycFile(e.target.files?.[0] || null)}
+                  className="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#05062F] hover:file:bg-blue-100 cursor-pointer"
+                />
+              </div>
+
+              <Button
+                text={
+                  isKycSubmitting ? "Submitting..." : "Submit KYC Verification"
+                }
+                type="submit"
+                disabled={isKycSubmitting}
+                bg="bg-[#05062F]"
+                width="w-full"
+                height="h-[46px]"
+                rounded="rounded-xl"
+                className="text-white text-sm font-semibold mt-2 disabled:opacity-50"
+              />
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-center mt-6">
         <Button
           text={isPending ? "Saving..." : "Save"}
           bg="bg-[#05062F]"
@@ -521,14 +635,12 @@ const Security = () => {
   );
 };
 
-// Contact Us
 const ContactUs = () => (
   <div className="flex flex-col h-full">
     <ContactChat variant="settings" />
   </div>
 );
 
-// Content map
 const contentMap = {
   personal: <PersonalInformation />,
   properties: <ManagedProperties />,
@@ -538,7 +650,6 @@ const contentMap = {
   logout: null,
 };
 
-// Main Layout
 const SettingsLayout = () => {
   const [active, setActive] = useState("personal");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
@@ -549,7 +660,6 @@ const SettingsLayout = () => {
   const { mutate: updateProfile, isPending: isAvatarPending } =
     useUpdateProfile();
 
-  // Avatar upload ref for left-panel avatar
   const panelAvatarInputRef = useRef(null);
 
   const handleMenu = (id) => {
@@ -597,7 +707,6 @@ const SettingsLayout = () => {
 
   return (
     <div>
-      {/* Hidden file input for desktop/mobile side panel avatar edit */}
       <input
         type="file"
         ref={panelAvatarInputRef}
@@ -607,10 +716,9 @@ const SettingsLayout = () => {
       />
 
       <Wrapper>
-        {/* MOBILE / TABLET */}
+        {/* MOBILE */}
         <div className="lg:hidden">
           {!mobileDetailOpen ? (
-            /* Menu list screen */
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center gap-2 mt-2">
                 <div className="relative">
@@ -656,7 +764,6 @@ const SettingsLayout = () => {
               </div>
             </div>
           ) : (
-            /* Detail screen for the selected menu item */
             <div className="flex flex-col gap-6">
               <div className="flex items-center gap-3">
                 <button
@@ -688,9 +795,8 @@ const SettingsLayout = () => {
           )}
         </div>
 
-        {/* DESKTOP (lg and up) */}
+        {/* DESKTOP */}
         <div className="hidden lg:flex gap-6 items-stretch">
-          {/* Left panel */}
           <div className="flex w-100 shrink-0 bg-white shadow-[100px_100px_100px_100px_rgba(0,0,0,0.1)] rounded-2xl p-5 flex-col items-center gap-6">
             <div className="flex flex-col items-center gap-2">
               <div className="relative">
@@ -742,7 +848,6 @@ const SettingsLayout = () => {
             </div>
           </div>
 
-          {/* Right panel */}
           <div
             className={`flex-1 bg-white shadow-[100px_100px_100px_100px_rgba(0,0,0,0.1)] rounded-2xl px-20 py-5 flex flex-col gap-6 ${fontFamily.main} h-full`}
           >
@@ -752,7 +857,6 @@ const SettingsLayout = () => {
           </div>
         </div>
 
-        {/* Logout modal */}
         {showLogout && (
           <SettingsModal
             type="logout"
