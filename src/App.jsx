@@ -24,6 +24,7 @@ import SavedLayout from "./pages/saved/SavedLayout";
 import ChatLayout from "./pages/chat/ChatLayout";
 import RequireAuth from "./components/auth/RequireAuth";
 import PropertyDetails from "./pages/property/PropertyDetails";
+import WalletVerify from "./pages/wallet/WalletVerify";
 
 const App = () => {
   return (
@@ -100,6 +101,7 @@ const App = () => {
           <Route path="saved" element={<SavedLayout />} />
           <Route path="chat" element={<ChatLayout />} />
           <Route path="property/:id" element={<PropertyDetails />} />
+          <Route path="wallet/verify" element={<WalletVerify />} />
         </Route>
       </Routes>
     </>

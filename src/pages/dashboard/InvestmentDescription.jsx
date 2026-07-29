@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios.js";
+import { subscribeToInvestment } from "../../api/investment.api.js";
 import Wrapper from "../../components/wrapper/Wrapper";
 import Investimg from "../../assets/image/meinvest.svg";
 import {
@@ -16,24 +17,22 @@ import MapIcon from "../../assets/icons/MapTrifold.png";
 import BadgeButton from "../../components/buttons/BadgeButton";
 import Button from "../../components/buttons/Button";
 import HeadIcon from "../../assets/icons/Headset.png";
-import DashImage from "../dashboard/DashImage"; // Reusing your dynamic adaptive card layout
+import DashImage from "../dashboard/DashImage";
 import InvestmentModal from "../../components/modals/InvestmentModal";
 
 const InvestmentDescription = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [durationOpen, setDurationOpen] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(0);
 
-  // Automatically snaps the viewport page back up to the top when navigating to a new ID
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [id]);
 
-  // Hook 1: Fetch details of the active investment package
   const {
     data: pkg,
     isPending,
@@ -48,24 +47,35 @@ const InvestmentDescription = () => {
     enabled: !!id,
   });
 
-  // Hook 2: Fetch other investments to populate the related recommendations grid
   const { data: relatedInvestments } = useQuery({
-    queryKey: ["related-investments", id], // 'id' ensures it re-runs the exclusion filter when the active package shifts
+    queryKey: ["related-investments", id],
     queryFn: async () => {
       const response = await api.get("/investments");
       const responseData = response?.data ?? response;
       const items = responseData?.data ?? responseData ?? [];
-      // Filter out the active package ID and take the top 3 alternative results
       return items.filter((item) => item.id !== id).slice(0, 3);
     },
   });
 
-  // Automatically seed the fallback selected investment chunk once backend loads
   useEffect(() => {
     if (pkg?.minAmount) {
       setSelectedAmount(Number(pkg.minAmount));
     }
   }, [pkg]);
+
+  // Subscription execution handler
+  const handleSubscriptionSubmit = async (transactionPin) => {
+    await subscribeToInvestment(id, {
+      amount: selectedAmount,
+      transactionPin,
+    });
+
+    // Invalidate cached query balances, profile subscriptions, and current package query
+    queryClient.invalidateQueries({ queryKey: ["wallet-balance"] });
+    queryClient.invalidateQueries({ queryKey: ["user-subscriptions"] });
+    queryClient.invalidateQueries({ queryKey: ["profile"] });
+    queryClient.invalidateQueries({ queryKey: ["investment", id] });
+  };
 
   if (isPending) {
     return (
@@ -93,7 +103,6 @@ const InvestmentDescription = () => {
     );
   }
 
-  // Database payload extraction definitions
   const name = pkg.name || "Investment Opportunity";
   const description = pkg.description || "No description provided.";
   const roi = pkg.roi ? `${pkg.roi}% ROI` : "0% ROI";
@@ -108,33 +117,32 @@ const InvestmentDescription = () => {
     : "₦0";
   const imageUrl = pkg.images?.[0] || Investimg;
 
-  // Build reactive stepping tier bounds to replace the hardcoded array map options
+  const isSubscribed = pkg?.isSubscribed || false;
+
   const packageOptions = [
-    { label: `Min Entry: {minPrice}`, value: Number(pkg.minAmount) },
+    { label: `Min Entry: ${minPrice}`, value: Number(pkg.minAmount) },
     {
       label: `Mid Entry: ₦${Math.floor((Number(pkg.minAmount) + Number(pkg.maxAmount)) / 2).toLocaleString()}`,
       value: Math.floor((Number(pkg.minAmount) + Number(pkg.maxAmount)) / 2),
     },
-    { label: `Max Cap: {maxPrice}`, value: Number(pkg.maxAmount) },
+    { label: `Max Cap: ${maxPrice}`, value: Number(pkg.maxAmount) },
   ];
 
   const modalDetails = [
     { label: "Package Model", value: name },
     {
-      label: "Your Funding Allocation",
+      label: "Funding Allocation",
       value: `₦${selectedAmount.toLocaleString()}`,
     },
     { label: "Lockup Timeline", value: duration },
-    { label: "Projected Return Matrix", value: roi },
-    { label: "Geographic Asset Hub", value: "Lagos Core Base" },
-    { label: "Status Code", value: pkg.status || "ACTIVE" },
+    { label: "Projected Return", value: roi },
+    { label: "Geographic Hub", value: pkg.location || "Lagos Base" },
   ];
 
   return (
-    /* The key={id} forces React to destroy and rebuild the component state when clicking dynamic related listings */
     <div key={id}>
       <Wrapper>
-        {/* ============ MOBILE SURFACE PANEL LAYOUT ============ */}
+        {/* MOBILE VIEW */}
         <div className="block md:hidden">
           <div className="relative -mx-4 -mt-4">
             <button
@@ -165,7 +173,6 @@ const InvestmentDescription = () => {
               {name}
             </h1>
 
-            {/* Selection Tiers Selector Component Row */}
             <div className="flex items-center gap-2 relative">
               <span
                 className={`${fontSize.md} ${fontWeight.normal} ${fontFamily.main} ${textColor.primary}`}
@@ -173,28 +180,31 @@ const InvestmentDescription = () => {
                 Capital Allocation:
               </span>
               <button
-                onClick={() => setOpen(!open)}
-                className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition text-[#2540A8] font-semibold"
+                onClick={() => !isSubscribed && setOpen(!open)}
+                disabled={isSubscribed}
+                className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition text-[#2540A8] font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>₦{selectedAmount.toLocaleString()}</span>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                >
-                  <path
-                    d="M6 9l6 6 6-6"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                {!isSubscribed && (
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                  >
+                    <path
+                      d="M6 9l6 6 6-6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
               </button>
 
-              {open && (
+              {open && !isSubscribed && (
                 <div className="absolute top-full mt-1 left-0 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden min-w-[180px]">
                   {packageOptions.map((pkgOpt, idx) => (
                     <button
@@ -216,11 +226,10 @@ const InvestmentDescription = () => {
               )}
             </div>
 
-            {/* Micro Badge Metadata Loops */}
             <div className="flex items-center gap-2 flex-wrap">
               <BadgeButton icon={Calenderimg} label={duration} />
               <BadgeButton icon={trendUp} label={roi} />
-              <BadgeButton icon={MapIcon} label="Lagos Hub" />
+              <BadgeButton icon={MapIcon} label={pkg.location || "Lagos Hub"} />
             </div>
 
             <p
@@ -236,7 +245,7 @@ const InvestmentDescription = () => {
                 Bound Guidelines
               </p>
               <p className="text-xs text-gray-600 mt-1">
-                Min entry cap limit:{" "}
+                Min entry limit:{" "}
                 <span className="font-semibold text-black">{minPrice}</span>
               </p>
               <p className="text-xs text-gray-600">
@@ -246,11 +255,12 @@ const InvestmentDescription = () => {
             </div>
 
             <Button
-              text="Invest Now"
+              text={isSubscribed ? "Already Subscribed" : "Invest Now"}
               width="w-full"
-              bg="bg-[#05062F]"
-              className={`text-white ${fontSize.md} ${fontWeight.normal} ${fontFamily.main} rounded-lg px-6 py-3 hover:bg-[#1a2352] transition`}
-              onClick={() => setModalOpen(true)}
+              bg={isSubscribed ? "bg-emerald-600" : "bg-[#05062F]"}
+              disabled={isSubscribed}
+              className={`text-white ${fontSize.md} ${fontWeight.normal} ${fontFamily.main} rounded-lg px-6 py-3 transition disabled:opacity-90 disabled:cursor-not-allowed`}
+              onClick={() => !isSubscribed && setModalOpen(true)}
             />
 
             <Link to="/app/contact" className="w-full">
@@ -274,7 +284,7 @@ const InvestmentDescription = () => {
           </div>
         </div>
 
-        {/* ============ DESKTOP EXPANDED VIEW LAYOUT ============ */}
+        {/* DESKTOP VIEW */}
         <div className="hidden md:flex gap-6 items-start">
           <div className="max-w-[480px] w-full shrink-0">
             <img
@@ -317,28 +327,31 @@ const InvestmentDescription = () => {
                 </p>
                 <div className="relative">
                   <button
-                    onClick={() => setOpen(!open)}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-100 transition font-bold text-[#2540A8]"
+                    onClick={() => !isSubscribed && setOpen(!open)}
+                    disabled={isSubscribed}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-100 transition font-bold text-[#2540A8] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span>₦{selectedAmount.toLocaleString()}</span>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                    >
-                      <path
-                        d="M6 9l6 6 6-6"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    {!isSubscribed && (
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                      >
+                        <path
+                          d="M6 9l6 6 6-6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
                   </button>
 
-                  {open && (
+                  {open && !isSubscribed && (
                     <div className="absolute top-full mt-1 left-0 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden min-w-[200px]">
                       {packageOptions.map((pkgOpt, idx) => (
                         <button
@@ -374,7 +387,10 @@ const InvestmentDescription = () => {
             <div className="flex items-center gap-3">
               <BadgeButton icon={Calenderimg} label={duration} />
               <BadgeButton icon={trendUp} label={roi} />
-              <BadgeButton icon={MapIcon} label="Lagos Core Hub" />
+              <BadgeButton
+                icon={MapIcon}
+                label={pkg.location || "Lagos Base"}
+              />
             </div>
 
             <div className="w-full">
@@ -387,11 +403,12 @@ const InvestmentDescription = () => {
 
             <div className="flex items-center gap-5 mt-4">
               <Button
-                text="Invest Now"
+                text={isSubscribed ? "Already Subscribed" : "Invest Now"}
                 width="w-[354px]"
-                bg="bg-[#05062F]"
-                className={`text-white ${fontSize.lg} ${fontWeight.medium} ${fontFamily.main} rounded-xl px-6 py-3.5 hover:bg-[#1a2352] transition-colors duration-300 transform active:scale-[0.99] shadow-sm`}
-                onClick={() => setModalOpen(true)}
+                bg={isSubscribed ? "bg-emerald-600" : "bg-[#05062F]"}
+                disabled={isSubscribed}
+                className={`text-white ${fontSize.lg} ${fontWeight.medium} ${fontFamily.main} rounded-xl px-6 py-3.5 transition-colors duration-300 disabled:opacity-90 disabled:cursor-not-allowed shadow-sm`}
+                onClick={() => !isSubscribed && setModalOpen(true)}
               />
               <Link to="/app/contact">
                 <button className="flex items-center justify-center gap-2 px-5 py-3.5 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm font-medium transition duration-200 text-gray-700">
@@ -413,19 +430,19 @@ const InvestmentDescription = () => {
           </div>
         </div>
 
-        {/* Modal Window Context */}
+        {/* Investment Modal Component */}
         <InvestmentModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          onConfirm={() => setModalOpen(false)}
-          title="Investment Allocation Confirmation"
-          subtitle="Review and confirm your capital lockup volume details before proceeding."
+          onConfirm={handleSubscriptionSubmit}
+          title="Investment Confirmation"
+          subtitle="Review details and enter your transaction PIN to confirm."
           cancelText="Cancel"
-          confirmText="Confirm"
+          confirmText="Confirm & Invest"
           details={modalDetails}
         />
 
-        {/* Dynamic Alternative Packages Recommendation Grid Block */}
+        {/* Related Opportunities Grid */}
         {relatedInvestments && relatedInvestments.length > 0 && (
           <div className="hidden md:block border-t border-gray-100 pt-8 mt-12">
             <h1

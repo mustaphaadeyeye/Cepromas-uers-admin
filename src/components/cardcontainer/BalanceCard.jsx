@@ -1,17 +1,42 @@
-import React from 'react'
+import React, { useState, useEffect } from "react";
 import {
   fontSize,
   fontWeight,
   textColor,
   fontFamily,
 } from "../../components/styles/theme";
-import Circleicon from "../../assets/icons/circlegroup.png"
+import Circleicon from "../../assets/icons/circlegroup.png";
+import { getWalletBalance } from "../../api/wallet";
 
 const BalanceCard = () => {
+  const [showBalance, setShowBalance] = useState(true);
+  const [balanceData, setBalanceData] = useState({
+    balance: 0,
+    availableBalance: 0,
+    pendingDeposits: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        setLoading(true);
+        const data = await getWalletBalance();
+        setBalanceData(data);
+      } catch (err) {
+        console.error("Failed to fetch wallet balance:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBalance();
+  }, []);
+
   return (
     <div
       style={{
-        background: 'linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)',
+        background: "linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)",
       }}
       className="
         w-full max-w-238.5
@@ -24,31 +49,81 @@ const BalanceCard = () => {
     >
       {/* Top row */}
       <div className="flex items-start justify-between">
-        <p className={`${textColor.white} ${fontWeight.normal} ${fontFamily.main} text-base sm:text-lg md:text-xl xl:${fontSize["2xl"]}`}>
-          Total Amount
+        <p
+          className={`${textColor.white} ${fontWeight.normal} ${fontFamily.main} text-base sm:text-lg md:text-xl xl:${fontSize["2xl"]}`}
+        >
+          Available Balance
         </p>
 
-        {/* Eye slash icon */}
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="opacity-75 shrink-0">
-          <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          <line x1="1" y1="1" x2="23" y2="23" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
+        {/* Eye slash toggle icon */}
+        <button
+          onClick={() => setShowBalance(!showBalance)}
+          className="cursor-pointer focus:outline-none"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="opacity-75 shrink-0"
+          >
+            <path
+              d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"
+              stroke="white"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <line
+              x1="1"
+              y1="1"
+              x2="23"
+              y2="23"
+              stroke="white"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
       </div>
 
       {/* Amount */}
-      <p className={`${textColor.white} ${fontWeight.light} ${fontFamily.main} break-words text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-tight`}>
-        ₦500,000,000
+      <p
+        className={`${textColor.white} ${fontWeight.light} ${fontFamily.main} break-words text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-tight`}
+      >
+        {loading
+          ? "₦..."
+          : showBalance
+            ? `₦${Number(balanceData.availableBalance || 0).toLocaleString()}`
+            : "₦••••••••"}
       </p>
 
       {/* Bottom row */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        {/* Growth indicator */}
+        {/* Growth/Total indicator */}
         <div className="flex items-center gap-1.5 min-w-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0 sm:w-6 sm:h-6">
-            <path d="M7 17L17 7M17 7H7M17 7v10" stroke="rgba(255,255,255,0.85)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="shrink-0 sm:w-6 sm:h-6"
+          >
+            <path
+              d="M7 17L17 7M17 7H7M17 7v10"
+              stroke="rgba(255,255,255,0.85)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
-          <span className={`${textColor.white} ${fontWeight.normal} ${fontFamily.main} text-sm sm:text-base md:text-lg xl:${fontSize["2xl"]} truncate`}>
-            ₦200,000,000 (20%)
+          <span
+            className={`${textColor.white} ${fontWeight.normal} ${fontFamily.main} text-sm sm:text-base md:text-lg xl:${fontSize["2xl"]} truncate`}
+          >
+            Total Balance:{" "}
+            {showBalance
+              ? `₦${Number(balanceData.balance || 0).toLocaleString()}`
+              : "₦••••••••"}
           </span>
         </div>
 
@@ -60,7 +135,7 @@ const BalanceCard = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BalanceCard
+export default BalanceCard;
