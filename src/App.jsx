@@ -30,27 +30,26 @@ const App = () => {
   return (
     <>
       <Toaster
-        position="top-center" // Changes the location to the center
+        position="top-center"
         toastOptions={{
           duration: 4000,
-          // Base style mirroring the image (solid white, square/subtle corners, flat shadow)
           style: {
             background: "#ffffff",
-            color: "#555555", // Soft gray text like in the image
-            borderRadius: "6px", // Tight, professional corner radius
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)", // Smooth, dark background contrast shadow
+            color: "#555555",
+            borderRadius: "6px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
             padding: "16px",
             fontSize: "14px",
             fontWeight: "500",
-            borderBottom: "4px solid transparent", // Placeholder for the bottom accent bar
+            borderBottom: "4px solid transparent",
           },
           success: {
             iconTheme: {
-              primary: "#00b300", // Vibrant green check from your reference image
+              primary: "#00b300",
               secondary: "#fff",
             },
             style: {
-              borderBottom: "4px solid #00b300", // The green accent bar at the bottom left
+              borderBottom: "4px solid #00b300",
             },
           },
           error: {
@@ -59,21 +58,24 @@ const App = () => {
               secondary: "#fff",
             },
             style: {
-              borderBottom: "4px solid #EF4444", // Red accent bar for error states
+              borderBottom: "4px solid #EF4444",
             },
           },
         }}
         reverseOrder={false}
       />
       <Routes>
-        {/* Login is the first page at "/" */}
+        {/* Unauthenticated / Public Auth Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/personal-info" element={<PersonalInfo />} />
         <Route path="/kyc" element={<Kyc />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* All app pages live under "/app" and require authentication */}
+        {/* Public payment callback route */}
+        <Route path="/wallet/verify" element={<WalletVerify />} />
+
+        {/* Authenticated Application Routes */}
         <Route
           path="/app"
           element={
@@ -101,7 +103,6 @@ const App = () => {
           <Route path="saved" element={<SavedLayout />} />
           <Route path="chat" element={<ChatLayout />} />
           <Route path="property/:id" element={<PropertyDetails />} />
-          <Route path="wallet/verify" element={<WalletVerify />} />
         </Route>
       </Routes>
     </>
