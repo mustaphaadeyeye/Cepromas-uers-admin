@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import HouseIcon from "../../assets/image/modalhouse.png";
 import UBALogo from "../../assets/image/uba.png";
 import UBAicon from "../../assets/icons/ubaicon.png";
@@ -6,6 +7,7 @@ import { fontFamily } from "../../components/styles/theme";
 import { fundWallet, withdrawWallet } from "../../api/wallet";
 
 const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     accountNumber: "",
@@ -16,12 +18,11 @@ const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
   const [transactionPin, setTransactionPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [isPinMissing, setIsPinMissing] = useState(false);
   const [successDetails, setSuccessDetails] = useState(null);
 
   // Robust Error Extraction Helper
-  // Robust Error Extraction Helper
   const extractErrorMessage = (err) => {
-    // 1. NestJS structured error message (e.g. from BadRequestException)
     const serverMessage = err.response?.data?.message;
 
     if (serverMessage) {
@@ -33,7 +34,6 @@ const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
       }
     }
 
-    // 2. Direct string payload returned from server
     if (
       typeof err.response?.data === "string" &&
       err.response.data.trim().length > 0
@@ -41,16 +41,14 @@ const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
       return err.response.data;
     }
 
-    // 3. Network or connection failure (when backend is unreachable)
     if (err.code === "ERR_NETWORK" || !err.response) {
       return "Unable to connect to server. Please check your internet connection.";
     }
 
-    // 4. Default clean fallback (Never show raw Axios error strings or status codes)
     return "Failed to process request. Please check your inputs and try again.";
   };
 
-  // Handle Fund Wallet
+  // Handle Fund Wallet (Flutterwave)
   const handleFund = async () => {
     if (!amount || Number(amount) <= 0) {
       setErrorMsg("Please enter a valid amount.");
@@ -60,9 +58,12 @@ const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
     try {
       setLoading(true);
       setErrorMsg("");
-      const res = await fundWallet(Number(amount), "paystack");
 
-      if (res.paymentLink) {
+      // Pass "flutterwave" as provider
+      const res = await fundWallet(Number(amount), "flutterwave");
+
+      // Redirect user to Flutterwave Payment Link
+      if (res?.paymentLink) {
         window.location.href = res.paymentLink;
       } else {
         setSuccessDetails({
@@ -96,6 +97,7 @@ const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
     try {
       setLoading(true);
       setErrorMsg("");
+      setIsPinMissing(false);
 
       const destinationInfo = `${form.accountName || "Personal Bank"} - ${form.accountNumber || ""} (${(form.bank || "Bank").toUpperCase()})`;
       const res = await withdrawWallet(
@@ -111,13 +113,27 @@ const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
           "Your withdrawal request has been processed successfully.",
         amount: Number(amount),
       });
-      setStep(4); // Move to custom success view
+      setStep(4); // Move to success view
       if (onSuccess) onSuccess();
     } catch (err) {
-      setErrorMsg(extractErrorMessage(err));
+      const extractedErr = extractErrorMessage(err);
+      setErrorMsg(extractedErr);
+
+      // Check if user needs to set up a transaction PIN first
+      if (
+        extractedErr.toLowerCase().includes("pin not set") ||
+        extractedErr.toLowerCase().includes("set up your pin")
+      ) {
+        setIsPinMissing(true);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoToSetPin = () => {
+    onClose();
+    navigate("/app/settings", { state: { openPin: true } });
   };
 
   return (
@@ -134,8 +150,16 @@ const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
 
         {/* Error Banner */}
         {errorMsg && (
-          <div className="w-full bg-red-50 text-red-600 text-xs p-3 rounded-lg text-center font-medium border border-red-100">
-            {errorMsg}
+          <div className="w-full bg-red-50 text-red-600 text-xs p-3 rounded-lg text-center font-medium border border-red-100 flex flex-col gap-2 items-center">
+            <span>{errorMsg}</span>
+            {isPinMissing && (
+              <button
+                onClick={handleGoToSetPin}
+                className="bg-[#0f1c3f] text-white text-xs px-3 py-1.5 rounded-md font-medium hover:bg-[#1a2f5e] cursor-pointer transition"
+              >
+                Set Transaction PIN in Settings →
+              </button>
+            )}
           </div>
         )}
 
@@ -295,13 +319,14 @@ const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
           </>
         )}
 
-        {/* ADD MONEY: Fund Wallet */}
+        {/* ADD MONEY: Fund Wallet (Flutterwave) */}
         {type === "addmoney" && step === 1 && (
           <>
             <div className="text-center">
               <h2 className="text-xl font-bold text-[#0f1c3f]">Fund Wallet</h2>
               <p className="text-gray-400 text-sm mt-1">
-                Enter the amount you'd like to add to your wallet.
+                Enter the amount you'd like to add to your wallet via
+                Flutterwave.
               </p>
             </div>
             <div className="w-full flex flex-col gap-1">
@@ -321,7 +346,7 @@ const ChooseAccountModal = ({ onClose, type, onSuccess }) => {
               disabled={loading}
               className="bg-[#0f1c3f] cursor-pointer text-white rounded-lg font-semibold text-sm hover:bg-[#1a2f5e] active:scale-95 transition-all w-full h-12 disabled:opacity-50"
             >
-              {loading ? "Processing..." : "Proceed"}
+              {loading ? "Initializing Payment..." : "Proceed to Payment"}
             </button>
           </>
         )}
