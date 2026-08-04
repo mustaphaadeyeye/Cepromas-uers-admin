@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import GrowthCard from './GrowthCard'
-import TransactionList from '../../components/cardcontainer/TransactionList';
+import React, { useState } from "react";
+import GrowthCard from "./GrowthCard";
+import TransactionList from "../../components/cardcontainer/TransactionList";
 
 import {
   fontSize,
@@ -11,7 +11,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
-const GrowthTab = () => {
+const GrowthTab = ({ currentInvestments = [], recentEarnings = [] }) => {
   const [activeTab, setActiveTab] = useState("investment");
   const navigate = useNavigate();
 
@@ -23,13 +23,15 @@ const GrowthTab = () => {
     }
   };
 
+  // Get first investment item to showcase in GrowthCard if available
+  const activeInvestment = currentInvestments[0];
+
   return (
     <div>
-      <div className={`flex flex-wrap justify-between items-center gap-3 ${fontFamily.main}`}>
-        
-        <div className='flex items-center gap-6 md:gap-10 lg:gap-20'>
-          
-         
+      <div
+        className={`flex flex-wrap justify-between items-center gap-3 ${fontFamily.main}`}
+      >
+        <div className="flex items-center gap-6 md:gap-10 lg:gap-20">
           <h1
             onClick={() => setActiveTab("investment")}
             className={`cursor-pointer pb-2 transition-all duration-300 text-base md:text-xl lg:text-[24px]
@@ -42,7 +44,6 @@ const GrowthTab = () => {
             Current Investment
           </h1>
 
-         
           <h1
             onClick={() => setActiveTab("earnings")}
             className={`cursor-pointer pb-2 transition-all duration-300 text-base md:text-xl lg:text-[24px]
@@ -56,7 +57,6 @@ const GrowthTab = () => {
           </h1>
         </div>
 
-       
         <div>
           <p
             onClick={handleSeeAll}
@@ -68,10 +68,25 @@ const GrowthTab = () => {
       </div>
 
       {/* Content */}
-      <div>
-        {activeTab === "investment" && <GrowthCard />}
+      <div className="mt-4">
+        {activeTab === "investment" && (
+          <GrowthCard
+            title={
+              activeInvestment
+                ? activeInvestment.packageName
+                : "Active Investment"
+            }
+            amount={
+              activeInvestment
+                ? `₦${Number(activeInvestment.amountInvested).toLocaleString()}`
+                : "₦0"
+            }
+          />
+        )}
 
-        {activeTab === "earnings" && <TransactionList />}
+        {activeTab === "earnings" && (
+          <TransactionList transactions={recentEarnings} />
+        )}
       </div>
     </div>
   );
