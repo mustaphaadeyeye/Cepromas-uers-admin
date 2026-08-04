@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Wrapper from "../../components/wrapper/Wrapper";
 import ProfileImg from "../../assets/image/profile.png";
 import {
@@ -55,7 +55,7 @@ const securityItems = [
 // ==========================================================
 // 1. PERSONAL INFORMATION (Includes KYC Status Badge + Modal)
 // ==========================================================
-const PersonalInformation = () => {
+const PersonalInformation = ({ autoOpenKyc = false }) => {
   const [editField, setEditField] = useState(null);
   const [kycModalOpen, setKycModalOpen] = useState(false);
   const [kycNin, setKycNin] = useState("");
@@ -91,6 +91,13 @@ const PersonalInformation = () => {
       if (user.nin) setKycNin(user.nin);
     }
   }, [user]);
+
+  // Open KYC modal automatically if redirected from investment prompt
+  useEffect(() => {
+    if (autoOpenKyc) {
+      setKycModalOpen(true);
+    }
+  }, [autoOpenKyc]);
 
   const handleAvatarFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -131,8 +138,14 @@ const PersonalInformation = () => {
 
     submitKyc(payload, {
       onSuccess: () => {
+        toast.success("KYC details submitted successfully!");
         setKycModalOpen(false);
         setKycFile(null);
+      },
+      onError: (err) => {
+        const msg =
+          err.response?.data?.message || "Failed to submit KYC verification.";
+        toast.error(msg);
       },
     });
   };
@@ -287,7 +300,7 @@ const PersonalInformation = () => {
           <div className="bg-white rounded-[20px] p-6 w-full max-w-md flex flex-col gap-4 relative shadow-2xl">
             <button
               onClick={() => setKycModalOpen(false)}
-              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:bg-gray-50"
+              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:bg-gray-50 cursor-pointer"
             >
               ✕
             </button>
@@ -341,7 +354,7 @@ const PersonalInformation = () => {
                 width="w-full"
                 height="h-[46px]"
                 rounded="rounded-xl"
-                className="text-white text-sm font-semibold mt-2 disabled:opacity-50"
+                className="text-white text-sm font-semibold mt-2 disabled:opacity-50 cursor-pointer"
               />
             </form>
           </div>
@@ -356,7 +369,7 @@ const PersonalInformation = () => {
           height="h-[50px]"
           disabled={isPending}
           rounded="rounded-[10px]"
-          className={`text-white ${fontSize.md} ${fontWeight.medium} ${fontFamily.main}`}
+          className={`text-white ${fontSize.md} ${fontWeight.medium} ${fontFamily.main} cursor-pointer`}
           onClick={handleSaveAll}
         />
       </div>
@@ -566,13 +579,20 @@ const Referrals = () => {
 };
 
 // ==========================================================
-// 4. SECURITY & MODALS
+// 4. SECURITY & MODALS (Includes Transaction PIN auto-open)
 // ==========================================================
-const Security = () => {
+const Security = ({ autoOpenPin = false }) => {
   const [securityModal, setSecurityModal] = useState(null);
   const { mutate: changePassword, isPending: passwordPending } =
     useChangePassword();
   const { mutate: setPin, isPending: pinPending } = useSetTransactionPin();
+
+  // Auto open Transaction Pin modal if requested from redirection
+  useEffect(() => {
+    if (autoOpenPin) {
+      setSecurityModal("Transaction Pin");
+    }
+  }, [autoOpenPin]);
 
   return (
     <div className="flex flex-col gap-5 xl:px-12 lg:px-8 md:px-4 px-2">
@@ -641,26 +661,34 @@ const ContactUs = () => (
   </div>
 );
 
-const contentMap = {
-  personal: <PersonalInformation />,
-  properties: <ManagedProperties />,
-  referrals: <Referrals />,
-  security: <Security />,
-  contact: <ContactUs />,
-  logout: null,
-};
-
 const SettingsLayout = () => {
   const [active, setActive] = useState("personal");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+
   const navigate = useNavigate();
+  const location = useLocation();
   const logout = useAuthStore((state) => state.logout);
   const { data: user } = useProfile();
   const { mutate: updateProfile, isPending: isAvatarPending } =
     useUpdateProfile();
 
   const panelAvatarInputRef = useRef(null);
+
+  // Read route state flags
+  const shouldAutoOpenKyc = Boolean(location.state?.openKyc);
+  const shouldAutoOpenPin = Boolean(location.state?.openPin);
+
+  // Handle auto tab switching based on redirection state
+  useEffect(() => {
+    if (shouldAutoOpenKyc) {
+      setActive("personal");
+      setMobileDetailOpen(true);
+    } else if (shouldAutoOpenPin) {
+      setActive("security");
+      setMobileDetailOpen(true);
+    }
+  }, [shouldAutoOpenKyc, shouldAutoOpenPin]);
 
   const handleMenu = (id) => {
     if (id === "logout") {
@@ -701,6 +729,15 @@ const SettingsLayout = () => {
         toast.error(msg, { id: toastId });
       },
     });
+  };
+
+  const contentMap = {
+    personal: <PersonalInformation autoOpenKyc={shouldAutoOpenKyc} />,
+    properties: <ManagedProperties />,
+    referrals: <Referrals />,
+    security: <Security autoOpenPin={shouldAutoOpenPin} />,
+    contact: <ContactUs />,
+    logout: null,
   };
 
   const activeItem = menuItems.find((item) => item.id === active);
