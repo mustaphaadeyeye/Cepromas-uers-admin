@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   fontWeight,
   fontFamily,
@@ -7,10 +7,10 @@ import {
 
 const ActionCard = ({
   icon,
-  number,          
-  text,             
+  number,
+  text,
   mobileText,
-  label,             
+  label,
   bg = "bg-[#E8F5E2]",
   textColor = "text-[#05062F]",
   width = "w-[314px]",
@@ -18,14 +18,14 @@ const ActionCard = ({
   onClick,
   rounded,
 }) => {
-  const isStatCard = number !== undefined
+  const isStatCard = number !== undefined;
 
   return (
     <div
       onClick={onClick}
       className={`
         ${bg} ${width} ${height} ${rounded}
-        rounded-2xl flex ${isStatCard ? 'flex-col md:flex-row' : 'flex-row'}
+        rounded-2xl flex ${isStatCard ? "flex-col md:flex-row" : "flex-row"}
         items-center justify-center text-center
         gap-1 md:gap-2 px-2 cursor-pointer transition duration-200 hover:opacity-90
       `}
@@ -67,7 +67,7 @@ const ActionCard = ({
         </span>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ActionCard
+export default ActionCard;
