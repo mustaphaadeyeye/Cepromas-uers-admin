@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/image/cepromasLogo.svg";
+import logo from "../../assets/image/newcep.png";
 import Button from "../../components/buttons/Button";
 import GlobalLoader from "../../components/loaders/GlobalLoader";
 import GlobalModal from "../../components/modals/GlobalModal";

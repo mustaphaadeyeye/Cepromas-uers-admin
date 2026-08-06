@@ -33,6 +33,14 @@ import {
 } from "../../hooks/profile/useSecurity";
 import { useReferrals } from "../../hooks/profile/useReferrals";
 import { useSubmitKyc } from "../../hooks/profile/useKyc";
+import AtIcon from "../../assets/icons/at.png"
+import Callicon from "../../assets/icons/call.png"
+import LiveChat from "../../assets/icons/live.png"
+import Xicon from "../../assets/icons/xpng.png"
+import Iicon from "../../assets/icons/insta.png"
+import Licon from "../../assets/icons/link.png"
+import Ficon from "../../assets/icons/fb.png"
+
 
 const menuItems = [
   { id: "personal", label: "Personal Information", icon: PersonalIcon },
@@ -657,7 +665,38 @@ const Security = ({ autoOpenPin = false }) => {
 
 const ContactUs = () => (
   <div className="flex flex-col h-full">
-    <ContactChat variant="settings" />
+    <div>
+      <h1 className="font-[#05062F] font-semibold text-[24px]">Contact Us</h1>
+      <p className="w-3/6 mt-2">
+        We’re here to help! Reach out to us anytime for support, questions, or feedback.
+      </p>
+
+      <div className="mt-5 flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <img src={AtIcon} alt="" />
+          <p>Companyname@gmail.com</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <img src={Callicon} alt="" />
+          <p>+234 123 456 7890</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <img src={LiveChat} alt="" />
+          <p>Live Chat</p>
+        </div>
+      </div>
+
+      <div className="mt-13 text-center">
+        <h1 className="font-semibold text-[#05062F] text-[16px]">Social Media Handle</h1>
+        <div className="flex justify-center gap-4 mt-2">
+          <img src={Xicon} alt="Twitter" />
+          <img src={Iicon} alt="Instagram" />
+          <img src={Licon} alt="LinkedIn" />
+          <img src={Ficon} alt="Facebook" />
+        </div>
+      </div>
+    </div>
   </div>
 );
 
