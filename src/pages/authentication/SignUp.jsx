@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/image/cepromasLogo.svg";
+import logo from "../../assets/image/newcep.png";
 import Button from "../../components/buttons/Button";
 import GlobalLoader from "../../components/loaders/GlobalLoader";
 import GlobalModal from "../../components/modals/GlobalModal";
@@ -338,7 +338,7 @@ const SignUp = () => {
           <img
             src={logo}
             alt="Cepromas Logo"
-            className="w-[300px] lg:w-[520px] object-contain"
+            className="w-[280px] lg:w-[300px] object-contain"
           />
         </div>
 

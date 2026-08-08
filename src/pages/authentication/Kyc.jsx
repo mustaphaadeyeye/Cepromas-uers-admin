@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import logo from "../../assets/image/cepromasLogo.svg";
+import logo from "../../assets/image/newcep.png";
 import {
   fontSize,
   fontWeight,
@@ -28,7 +28,7 @@ const Kyc = () => {
   <img
     src={logo}
     alt="Cepromas Logo"
-    className="w-[280px] lg:w-[500px] object-contain"
+    className="w-[280px] lg:w-[300px] object-contain"
   />
 </div>
         <div className='bg-[#ffffff] w-full max-w-[500px] lg:w-[500px] lg:h-[500px] shadow-[0px_25px_50px_rgba(0,0,0,0.1)] rounded-2xl py-10 lg:py-18 px-6 sm:px-10 lg:px-20 border border-[#E5E7EB]'>

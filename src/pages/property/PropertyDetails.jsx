@@ -21,6 +21,10 @@ const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+const handleverification = () => {
+  navigate("/app/verify-property");
+};
+
   // Forces the window view to snap back up to the top whenever a new listing id mounts
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -179,7 +183,8 @@ const PropertyDetails = () => {
               text="Proceed with Inquiry"
               width="w-full"
               bg="bg-[#05062F]"
-              className={`text-white ${fontSize.md} ${fontWeight.normal} ${fontFamily.main} rounded-lg px-6 py-3 hover:bg-[#1a2352] transition-colors duration-300 mt-2`}
+            
+              className={`text-white ${fontSize.md} ${fontWeight.normal} ${fontFamily.main} rounded-lg px-6 py-3 hover:bg-[#1a2352] transition-colors duration-300 mt-2 cursor-pointer`}
             />
 
             <button
@@ -322,7 +327,8 @@ const PropertyDetails = () => {
                   text="Proceed With Transaction"
                   width="w-[280px]"
                   bg="bg-[#05062F]"
-                  className={`text-white ${fontSize.md} ${fontWeight.medium} ${fontFamily.main} rounded-xl px-6 py-3.5 hover:bg-[#1a2352] transition-all duration-300 transform active:scale-[0.99] shadow-sm`}
+                  onClick={handleverification}
+                  className={`text-white ${fontSize.md} ${fontWeight.medium} ${fontFamily.main} rounded-xl px-6 py-3.5 hover:bg-[#1a2352] transition-all duration-300 transform active:scale-[0.99] shadow-sm cursor-pointer`}
                 />
                 <button
                   onClick={() => navigate("/app/chat")}

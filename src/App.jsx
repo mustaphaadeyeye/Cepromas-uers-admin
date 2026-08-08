@@ -25,6 +25,9 @@ import ChatLayout from "./pages/chat/ChatLayout";
 import RequireAuth from "./components/auth/RequireAuth";
 import PropertyDetails from "./pages/property/PropertyDetails";
 import WalletVerify from "./pages/wallet/WalletVerify";
+import VerifyProperty from "./pages/property/VerifyProperty";
+import Notification from "./components/Notification"
+
 
 const App = () => {
   return (
@@ -74,6 +77,7 @@ const App = () => {
 
         {/* Public payment callback route */}
         <Route path="/wallet/verify" element={<WalletVerify />} />
+        <Route path="verify-property" element={<VerifyProperty />} />
 
         {/* Authenticated Application Routes */}
         <Route
@@ -103,6 +107,9 @@ const App = () => {
           <Route path="saved" element={<SavedLayout />} />
           <Route path="chat" element={<ChatLayout />} />
           <Route path="property/:id" element={<PropertyDetails />} />
+          <Route path="verify-property" element={<VerifyProperty/>} />
+          <Route path="notifications" element={<Notification />} />
+          
         </Route>
       </Routes>
     </>

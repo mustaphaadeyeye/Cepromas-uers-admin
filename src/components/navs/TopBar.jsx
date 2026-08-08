@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Wrapper from "../wrapper/Wrapper";
-import logoImg from "../../assets/icons/applogo.png";
+import logoImg from "../../assets/image/ceproamlogo.svg";
 import DashImg from "../../assets/icons/myhouse.png";
 import WalletIcon from "../../assets/icons/mywallet.svg";
 import SavedIcon from "../../assets/icons/newsavedicon.png";
@@ -8,13 +8,15 @@ import SettingIcon from "../../assets/icons/myset.png";
 import GrowthIcon from "../../assets/icons/mygro.png";
 // import SearchInput from "../inputs/SearchInput";
 import NotificationIcon from "../../assets/icons/notIcon.png";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import SarahImg from "../../assets/image/sarahjohn.png";
 import ProfileImg from "../../assets/image/profile.png";
 import { fontSize, fontWeight, fontFamily, textColor } from "../styles/theme";
 import StoreIcon from "../../assets/icons/store.png"
 import ChatIcon from "../../assets/icons/chaticon.png"
-import { FiMenu, FiX } from "react-icons/fi";
+import { FiMenu, FiX, FiBell, } from "react-icons/fi";
+
+
 
 
 const navItems = [
@@ -47,6 +49,13 @@ const activeFilter = "invert(20%) sepia(90%) saturate(5000%) hue-rotate(355deg) 
 
 const TopBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  
+const handleNotify = () => {
+  navigate("/app/notifications");
+};
 
   return (
     <>
@@ -113,11 +122,8 @@ const TopBar = () => {
                 {/* <SearchInput /> */}
               </div>
               <div className="relative cursor-pointer">
-                <img
-                  src={NotificationIcon}
-                  alt="Notifications"
-                  className="hover:scale-105 transition hidden lg:block"
-                />
+                <FiBell size={24} color="#333" strokeWidth={2} onClick={handleNotify} />
+                
               </div>
               <img
                 src={SarahImg}
