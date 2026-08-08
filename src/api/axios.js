@@ -2,11 +2,8 @@ import axios from "axios";
 import { useAuthStore } from "../stores/auth.store";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "https://cepromas-backend-api.onrender.com",
 });
-// const api = axios.create({
-//   baseURL: "https://cepromas-backend-api.onrender.com",
-// });
 
 // Request Interceptor: Attach bearer token automatically
 api.interceptors.request.use(
