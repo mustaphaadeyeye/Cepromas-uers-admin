@@ -9,6 +9,7 @@ import {
 const GrowthCard = ({
   title = "Total Amount",
   amount = "₦2,500,000",
+  subText,
   icon,
 }) => {
   return (
@@ -16,20 +17,25 @@ const GrowthCard = ({
       style={{
         background: "linear-gradient(135deg, #6B7FD4 0%, #8B9FE8 100%)",
       }}
-      className="rounded-[10px] p-4 md:p-6 w-full xl:w-[944px] h-[90px] md:h-[134px] relative"
+      className="rounded-[10px] p-4 md:p-6 w-full xl:w-[944px] min-h-[90px] md:min-h-[134px] relative flex flex-col justify-between"
     >
       <div className="flex justify-between items-center h-full">
         <div>
           <p
-            className={`${textColor.white} text-sm md:text-2xl ${fontWeight.normal} ${fontFamily.main}`}
+            className={`${textColor.white} text-sm md:text-xl ${fontWeight.normal} ${fontFamily.main}`}
           >
             {title}
           </p>
           <p
-            className={`${textColor.white} text-xl md:text-4xl ${fontWeight.bold} ${fontFamily.main} mt-1 md:mt-4`}
+            className={`${textColor.white} text-xl md:text-3xl lg:text-4xl ${fontWeight.bold} ${fontFamily.main} mt-1 md:mt-2`}
           >
             {amount}
           </p>
+          {subText && (
+            <p className="text-white/80 text-[11px] md:text-xs font-medium mt-1">
+              {subText}
+            </p>
+          )}
         </div>
 
         {icon && (

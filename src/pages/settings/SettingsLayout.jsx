@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Wrapper from "../../components/wrapper/Wrapper";
 import ProfileImg from "../../assets/image/profile.png";
 import {
@@ -41,15 +42,6 @@ const menuItems = [
   { id: "security", label: "Security", icon: SecurityIcon },
   { id: "contact", label: "Contact Us", icon: ContactIcon },
   { id: "logout", label: "Logout", icon: LogoutIcon },
-];
-
-const securityItems = [
-  {
-    label: "Login Password",
-    sub: "Change your login password",
-    icon: LoginPwdIcon,
-  },
-  { label: "Transaction Pin", sub: "Set transaction pin", icon: LoginPwdIcon },
 ];
 
 // ==========================================================
@@ -579,13 +571,44 @@ const Referrals = () => {
 };
 
 // ==========================================================
-// 4. SECURITY & MODALS (Includes Transaction PIN auto-open)
+// 4. SECURITY & MODALS (Includes Transaction PIN State Checks)
 // ==========================================================
 const Security = ({ autoOpenPin = false }) => {
   const [securityModal, setSecurityModal] = useState(null);
+  const queryClient = useQueryClient();
+
+  const { data: user, refetch: refetchProfile } = useProfile();
   const { mutate: changePassword, isPending: passwordPending } =
     useChangePassword();
   const { mutate: setPin, isPending: pinPending } = useSetTransactionPin();
+
+  const hasPin = Boolean(user?.transactionPin);
+
+  const securityItems = [
+    {
+      id: "Login Password",
+      label: "Login Password",
+      sub: "Change your login password",
+      icon: LoginPwdIcon,
+    },
+    {
+      id: "Transaction Pin",
+      label: "Transaction PIN",
+      sub: hasPin
+        ? "Update or reset your existing transaction PIN"
+        : "Set transaction pin",
+      icon: LoginPwdIcon,
+      badge: hasPin ? (
+        <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
+          ✓ PIN Set
+        </span>
+      ) : (
+        <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
+          ⚠️ Not Set
+        </span>
+      ),
+    },
+  ];
 
   // Auto open Transaction Pin modal if requested from redirection
   useEffect(() => {
@@ -598,15 +621,18 @@ const Security = ({ autoOpenPin = false }) => {
     <div className="flex flex-col gap-5 xl:px-12 lg:px-8 md:px-4 px-2">
       {securityItems.map((item) => (
         <div
-          key={item.label}
+          key={item.id}
           className="flex items-center justify-between border-b border-gray-100 pb-4"
         >
           <div className="flex flex-col gap-1">
-            <span
-              className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
-            >
-              {item.label}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
+              >
+                {item.label}
+              </span>
+              {item.badge}
+            </div>
             <span
               className={`${fontSize.xs} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}
             >
@@ -614,7 +640,7 @@ const Security = ({ autoOpenPin = false }) => {
             </span>
           </div>
           <button
-            onClick={() => setSecurityModal(item.label)}
+            onClick={() => setSecurityModal(item.id)}
             className="p-2 rounded-lg transition cursor-pointer hover:bg-gray-50"
           >
             <img src={item.icon} alt={item.label} />
@@ -642,11 +668,28 @@ const Security = ({ autoOpenPin = false }) => {
       {securityModal === "Transaction Pin" && (
         <SettingsModal
           type="pin"
+          hasPin={hasPin}
           isPending={pinPending}
           onClose={() => setSecurityModal(null)}
           onSubmitPin={(dto) => {
             setPin(dto, {
-              onSuccess: () => setSecurityModal(null),
+              onSuccess: () => {
+                toast.success(
+                  hasPin
+                    ? "Transaction PIN updated successfully!"
+                    : "Transaction PIN set successfully!",
+                );
+                setSecurityModal(null);
+                queryClient.invalidateQueries({ queryKey: ["profile"] });
+                queryClient.invalidateQueries({ queryKey: ["user"] });
+                refetchProfile();
+              },
+              onError: (err) => {
+                const msg =
+                  err?.response?.data?.message ||
+                  "Failed to update transaction PIN.";
+                toast.error(msg);
+              },
             });
           }}
         />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   fontFamily,
   fontSize,
@@ -14,6 +14,7 @@ const SettingsModal = ({
   value,
   type,
   item,
+  hasPin = false, // Indicates if the user already has a transaction PIN set
   onConfirmLogout,
   onSave, // Handles detail edits (Full Name, Address, etc.)
   onSubmitPassword, // Handles password updates
@@ -27,31 +28,103 @@ const SettingsModal = ({
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  // Local state for PIN change fields
+  // Local state for PIN change fields (Set & Reset Mode)
+  const [currentPin, setCurrentPin] = useState(["", "", "", ""]);
   const [pin, setPin] = useState(["", "", "", ""]);
   const [confirmPin, setConfirmPin] = useState(["", "", "", ""]);
+
+  // Refs array for PinBoxes auto-focus shifting
+  const currentPinRefs = useRef([]);
+  const pinRefs = useRef([]);
+  const confirmPinRefs = useRef([]);
 
   // Keep detail input in sync if prop changes
   useEffect(() => {
     setDetailInput(value || "");
   }, [value]);
 
-  const handlePinChange = (val, index, setter, state) => {
+  // Auto-focus first input box when PIN modal opens
+  useEffect(() => {
+    if (type === "pin") {
+      setTimeout(() => {
+        if (hasPin && currentPinRefs.current[0]) {
+          currentPinRefs.current[0]?.focus();
+        } else if (pinRefs.current[0]) {
+          pinRefs.current[0]?.focus();
+        }
+      }, 50);
+    }
+  }, [type, hasPin]);
+
+  // Auto-advance & Backspace auto-retreat handler
+  const handlePinChange = (rawVal, index, setter, state, refs) => {
+    const digitsOnly = rawVal.replace(/\D/g, "");
+    if (!digitsOnly && rawVal !== "") return;
+
+    const singleDigit = digitsOnly ? digitsOnly.slice(-1) : "";
+
     const updated = [...state];
-    updated[index] = val.slice(-1);
+    updated[index] = singleDigit;
     setter(updated);
+
+    // Auto-advance cursor to next input box if digit entered
+    if (singleDigit && index < state.length - 1) {
+      setTimeout(() => {
+        refs.current[index + 1]?.focus();
+      }, 10);
+    }
   };
 
-  const PinBoxes = ({ value, setter }) => (
-    <div className="flex gap-2 sm:gap-3">
+  // Backspace retreat handler when box is empty
+  const handlePinKeyDown = (index, e, state, refs) => {
+    if (e.key === "Backspace") {
+      if (!state[index] && index > 0) {
+        e.preventDefault();
+        const updated = [...state];
+        updated[index - 1] = "";
+        refs.current[index - 1]?.focus();
+      }
+    }
+  };
+
+  // Pasting full PIN handler
+  const handlePinPaste = (e, setter, refs, length = 4) => {
+    e.preventDefault();
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, length);
+    if (!pasted) return;
+
+    const newDigits = Array(length).fill("");
+    for (let i = 0; i < pasted.length; i++) {
+      newDigits[i] = pasted[i];
+    }
+    setter(newDigits);
+
+    const focusIndex = Math.min(pasted.length, length - 1);
+    setTimeout(() => {
+      refs.current[focusIndex]?.focus();
+    }, 10);
+  };
+
+  const PinBoxes = ({ value, setter, refs }) => (
+    <div
+      className="flex gap-2 sm:gap-3"
+      onPaste={(e) => handlePinPaste(e, setter, refs, value.length)}
+    >
       {value.map((v, i) => (
         <input
           key={i}
+          ref={(el) => (refs.current[i] = el)}
           type="password"
-          maxLength={1}
+          inputMode="numeric"
           value={v}
           disabled={isPending}
-          onChange={(e) => handlePinChange(e.target.value, i, setter, value)}
+          onChange={(e) =>
+            handlePinChange(e.target.value, i, setter, value, refs)
+          }
+          onKeyDown={(e) => handlePinKeyDown(i, e, value, refs)}
           className="w-full max-w-[80px] h-12 sm:h-14 border border-gray-200 rounded-lg text-center text-lg outline-none bg-gray-50 focus:border-[#05062F] transition duration-200"
         />
       ))}
@@ -82,20 +155,29 @@ const SettingsModal = ({
 
   // 3. SAVE PIN
   const handlePinSave = () => {
+    const currentPinStr = currentPin.join("");
     const pinStr = pin.join("");
     const confirmPinStr = confirmPin.join("");
 
+    if (hasPin && currentPinStr.length < 4) {
+      toast.error("Please enter your current 4-digit PIN");
+      return;
+    }
+
     if (pinStr.length < 4) {
-      toast.error("Please enter a full 4-digit PIN");
+      toast.error("Please enter a full 4-digit new PIN");
       return;
     }
     if (pinStr !== confirmPinStr) {
-      toast.error("Transaction PINs do not match");
+      toast.error("New PIN and confirmation PIN do not match");
       return;
     }
 
     if (onSubmitPin) {
-      onSubmitPin({ transactionPin: pinStr });
+      onSubmitPin({
+        ...(hasPin ? { currentPin: currentPinStr } : {}),
+        transactionPin: pinStr,
+      });
     } else {
       onClose();
     }
@@ -219,25 +301,43 @@ const SettingsModal = ({
             ✕
           </button>
           <h2 className="text-xl font-bold text-[#0f1c3f] text-center">
-            Set Transaction PIN
+            {hasPin ? "Update Transaction PIN" : "Set Transaction PIN"}
           </h2>
           <div className="w-full flex flex-col gap-4">
+            {hasPin && (
+              <div className="flex flex-col gap-2 pb-2 border-b border-gray-100">
+                <label className="text-sm text-[#0f1c3f] font-medium">
+                  Current Transaction PIN
+                </label>
+                <PinBoxes
+                  value={currentPin}
+                  setter={setCurrentPin}
+                  refs={currentPinRefs}
+                />
+              </div>
+            )}
+
             <div className="flex flex-col gap-2">
               <label className="text-sm text-[#0f1c3f] font-medium">
-                Transaction PIN
+                {hasPin ? "New Transaction PIN" : "Transaction PIN"}
               </label>
-              <PinBoxes value={pin} setter={setPin} />
+              <PinBoxes value={pin} setter={setPin} refs={pinRefs} />
             </div>
+
             <div className="flex flex-col gap-2">
               <label className="text-sm text-[#0f1c3f] font-medium">
-                Confirm Transaction PIN
+                {hasPin ? "Confirm New PIN" : "Confirm Transaction PIN"}
               </label>
-              <PinBoxes value={confirmPin} setter={setConfirmPin} />
+              <PinBoxes
+                value={confirmPin}
+                setter={setConfirmPin}
+                refs={confirmPinRefs}
+              />
             </div>
           </div>
           <Button
             onClick={handlePinSave}
-            text={isPending ? "Setting PIN..." : "Save"}
+            text={isPending ? "Saving..." : hasPin ? "Update PIN" : "Save"}
             disabled={isPending}
             width="w-full max-w-[257px]"
             height="h-[50px]"

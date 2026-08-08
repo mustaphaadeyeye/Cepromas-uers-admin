@@ -20,7 +20,10 @@ const GrowthLayout = () => {
   const [summaryData, setSummaryData] = useState({
     metrics: {
       totalInvestmentValue: 0,
+      totalAccruedProfitToDate: 0,
       totalReturnsValue: 0,
+      totalPortfolioPaybackAtMaturity: 0,
+      blendedRoiPercent: 0,
       totalInvestmentCount: 0,
       ongoingCount: 0,
       completedCount: 0,
@@ -34,8 +37,9 @@ const GrowthLayout = () => {
     try {
       setLoading(true);
       const data = await getGrowthSummary(tf);
-      if (data) {
-        setSummaryData(data);
+      const responseData = data?.data ?? data;
+      if (responseData) {
+        setSummaryData(responseData);
       }
     } catch (err) {
       console.error("Failed to load growth summary data:", err);
@@ -51,9 +55,13 @@ const GrowthLayout = () => {
   const { metrics, revenueOverview, currentInvestments, recentEarnings } =
     summaryData;
 
-  // Format currency helpers
-  const formattedInvestmentValue = `₦${Number(metrics.totalInvestmentValue || 0).toLocaleString()}`;
-  const formattedReturnsValue = `₦${Number(metrics.totalReturnsValue || 0).toLocaleString()}`;
+  const formattedInvestmentValue = `₦${Number(
+    metrics?.totalInvestmentValue || 0,
+  ).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+  const formattedAccruedProfit = `+₦${Number(
+    metrics?.totalAccruedProfitToDate || 0,
+  ).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
   if (loading) {
     return (
@@ -80,27 +88,31 @@ const GrowthLayout = () => {
         <p
           className={`${fontFamily.main} ${fontWeight.normal} text-[14px] ${textColor.gray500} mb-5`}
         >
-          Track how your investments are performing over time.
+          Track how your active investments are performing over time.
         </p>
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row">
         <div className="flex flex-col gap-2 w-full">
           <GrowthCard
-            title="Total Investment Value"
+            title="Total Capital Invested"
             amount={formattedInvestmentValue}
             icon={Circleicon}
+            subText={`Blended Portfolio ROI: ${metrics?.blendedRoiPercent || 0}%`}
           />
           <GrowthCard
-            title="Total Returns Value"
-            amount={formattedReturnsValue}
+            title="Accrued Profit To Date"
+            amount={formattedAccruedProfit}
             icon={ListIcon}
+            subText={`Target Maturity Yield: ₦${Number(
+              metrics?.totalPortfolioPaybackAtMaturity || 0,
+            ).toLocaleString()}`}
           />
         </div>
 
         <div className="flex flex-row flex-wrap gap-2 lg:flex-col lg:flex-nowrap w-full lg:w-auto">
           <ActionCard
-            number={String(metrics.totalInvestmentCount || 0)}
+            number={String(metrics?.totalInvestmentCount || 0)}
             label="Total Investment"
             bg="bg-[#DBE8FD]"
             width="w-[31%] lg:w-[314px]"
@@ -108,7 +120,7 @@ const GrowthLayout = () => {
             rounded="rounded-[8px] lg:rounded-[6px]"
           />
           <ActionCard
-            number={String(metrics.ongoingCount || 0)}
+            number={String(metrics?.ongoingCount || 0)}
             label="Ongoing"
             bg="bg-[#FEFAA2]"
             width="w-[31%] lg:w-[314px]"
@@ -116,7 +128,7 @@ const GrowthLayout = () => {
             rounded="rounded-[8px] lg:rounded-[6px]"
           />
           <ActionCard
-            number={String(metrics.completedCount || 0)}
+            number={String(metrics?.completedCount || 0)}
             label="Completed"
             bg="bg-[#E1FBC1]"
             width="w-[31%] lg:w-[314px]"
