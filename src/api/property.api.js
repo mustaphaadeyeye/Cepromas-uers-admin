@@ -18,3 +18,10 @@ export const getAllProperties = async (params = {}) => {
 export const togglePropertyFavourite = async (id) => {
   return api.post(`/properties/${id}/favourite`);
 };
+
+export const purchaseProperty = async (propertyId, transactionPin) => {
+  const response = await api.post(`/properties/${propertyId}/purchase`, {
+    transactionPin,
+  });
+  return response?.data?.data ?? response?.data;
+};

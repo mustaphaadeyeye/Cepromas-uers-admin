@@ -26,8 +26,9 @@ import RequireAuth from "./components/auth/RequireAuth";
 import PropertyDetails from "./pages/property/PropertyDetails";
 import WalletVerify from "./pages/wallet/WalletVerify";
 import VerifyProperty from "./pages/property/VerifyProperty";
-import Notification from "./components/Notification"
-
+import Notification from "./components/Notification";
+import OwnerProperties from "./pages/property/OwnerProperties";
+import OwnerInvestments from "./pages/investment/OwnerInvestments";
 
 const App = () => {
   return (
@@ -107,9 +108,16 @@ const App = () => {
           <Route path="saved" element={<SavedLayout />} />
           <Route path="chat" element={<ChatLayout />} />
           <Route path="property/:id" element={<PropertyDetails />} />
-          <Route path="verify-property" element={<VerifyProperty/>} />
+          <Route path="verify-property" element={<VerifyProperty />} />
           <Route path="notifications" element={<Notification />} />
-          
+          <Route
+            path="owner-properties/:agentId"
+            element={<OwnerProperties />}
+          />
+          <Route
+            path="owner-investments/:agentId"
+            element={<OwnerInvestments />}
+          />
         </Route>
       </Routes>
     </>

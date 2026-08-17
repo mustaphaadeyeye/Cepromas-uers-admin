@@ -21,7 +21,6 @@ import InviteCode from "./InviteCode";
 import LoginPwdIcon from "../../assets/icons/LoginPwd.png";
 import SettingsModal from "../../components/modals/SettingsModal";
 import SecurityBgIcon from "../../assets/icons/securityicon.png";
-import ContactChat from "../../components/chatandconditions/ContactChat";
 import Button from "../../components/buttons/Button";
 import { useAuthStore } from "../../stores/auth.store";
 import toast from "react-hot-toast";
@@ -34,14 +33,13 @@ import {
 } from "../../hooks/profile/useSecurity";
 import { useReferrals } from "../../hooks/profile/useReferrals";
 import { useSubmitKyc } from "../../hooks/profile/useKyc";
-import AtIcon from "../../assets/icons/at.png"
-import Callicon from "../../assets/icons/call.png"
-import LiveChat from "../../assets/icons/live.png"
-import Xicon from "../../assets/icons/xpng.png"
-import Iicon from "../../assets/icons/insta.png"
-import Licon from "../../assets/icons/link.png"
-import Ficon from "../../assets/icons/fb.png"
-
+import AtIcon from "../../assets/icons/at.png";
+import Callicon from "../../assets/icons/call.png";
+import LiveChat from "../../assets/icons/live.png";
+import Xicon from "../../assets/icons/xpng.png";
+import Iicon from "../../assets/icons/insta.png";
+import Licon from "../../assets/icons/link.png";
+import Ficon from "../../assets/icons/fb.png";
 
 const menuItems = [
   { id: "personal", label: "Personal Information", icon: PersonalIcon },
@@ -53,7 +51,7 @@ const menuItems = [
 ];
 
 // ==========================================================
-// 1. PERSONAL INFORMATION (Includes KYC Status Badge + Modal)
+// 1. PERSONAL INFORMATION
 // ==========================================================
 const PersonalInformation = ({ autoOpenKyc = false }) => {
   const [editField, setEditField] = useState(null);
@@ -92,7 +90,6 @@ const PersonalInformation = ({ autoOpenKyc = false }) => {
     }
   }, [user]);
 
-  // Open KYC modal automatically if redirected from investment prompt
   useEffect(() => {
     if (autoOpenKyc) {
       setKycModalOpen(true);
@@ -158,7 +155,6 @@ const PersonalInformation = ({ autoOpenKyc = false }) => {
     );
   }
 
-  // Determine KYC Badge Display
   const isKycVerified = user?.isKycVerified;
   const kycStatus =
     user?.kycStatus || (isKycVerified ? "VERIFIED" : "UNVERIFIED");
@@ -294,7 +290,6 @@ const PersonalInformation = ({ autoOpenKyc = false }) => {
         />
       )}
 
-      {/* KYC SUBMISSION MODAL */}
       {kycModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
           <div className="bg-white rounded-[20px] p-6 w-full max-w-md flex flex-col gap-4 relative shadow-2xl">
@@ -378,7 +373,126 @@ const PersonalInformation = ({ autoOpenKyc = false }) => {
 };
 
 // ==========================================================
-// 2. MANAGED PROPERTIES
+// LARGE DETAIL MODAL (Displays Full Package/Property Details)
+// ==========================================================
+const ItemDetailModal = ({ item, onClose }) => {
+  if (!item) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[24px] p-6 sm:p-8 flex flex-col gap-6 relative shadow-2xl animate-in fade-in zoom-in duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition cursor-pointer text-base font-bold z-10"
+          aria-label="Close modal"
+        >
+          ✕
+        </button>
+
+        {/* Cover Image Header */}
+        {item.coverImage && (
+          <div className="w-full h-64 rounded-2xl overflow-hidden border border-gray-100 shadow-xs">
+            <img
+              src={item.coverImage}
+              alt={item.title || item.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="flex flex-col gap-1 pr-6">
+          <span className="text-xs text-blue-600 font-bold uppercase tracking-wider">
+            {item.type || item.category || "Acquired Asset"}
+          </span>
+          <h2 className="text-2xl font-bold text-[#05062F]">
+            {item.title || item.name}
+          </h2>
+          <p className="text-xs text-gray-500">
+            📍 {item.location || "Nigeria"}
+          </p>
+        </div>
+
+        {/* Details Summary Table */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#F8FAFD] border border-gray-100 rounded-2xl p-4">
+          <div className="flex flex-col">
+            <span className="text-[11px] text-gray-400 font-medium">
+              Amount / Stake
+            </span>
+            <span className="text-sm font-bold text-[#05062F]">
+              {item.amount}
+            </span>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[11px] text-gray-400 font-medium">
+              Transaction Date
+            </span>
+            <span className="text-sm font-bold text-gray-700">{item.date}</span>
+          </div>
+
+          {item.roi && (
+            <div className="flex flex-col">
+              <span className="text-[11px] text-gray-400 font-medium">
+                Projected ROI
+              </span>
+              <span className="text-sm font-bold text-emerald-600">
+                {item.roi} ({item.interestEarned} Profit)
+              </span>
+            </div>
+          )}
+
+          {item.duration && (
+            <div className="flex flex-col">
+              <span className="text-[11px] text-gray-400 font-medium">
+                Tenure Lockup
+              </span>
+              <span className="text-sm font-bold text-[#05062F]">
+                {item.duration}
+              </span>
+            </div>
+          )}
+
+          {item.transactionId && (
+            <div className="flex flex-col sm:col-span-2 pt-2 border-t border-gray-200/60">
+              <span className="text-[11px] text-gray-400 font-medium">
+                Reference ID
+              </span>
+              <span className="text-xs font-mono text-gray-700">
+                {item.transactionId}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {item.description && (
+          <div className="flex flex-col gap-1.5">
+            <h3 className="text-sm font-bold text-[#05062F]">Description</h3>
+            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+              {item.description}
+            </p>
+          </div>
+        )}
+
+        <Button
+          text="Close Details"
+          onClick={onClose}
+          width="w-full"
+          bg="bg-[#05062F]"
+          className="text-white rounded-xl py-3.5 hover:bg-[#1a2352] transition text-sm font-semibold cursor-pointer"
+        />
+      </div>
+    </div>
+  );
+};
+
+// ==========================================================
+// 2. MANAGED PROPERTIES (Bought Properties & Investment Portfolios)
 // ==========================================================
 const ManagedProperties = () => {
   const [selectedItem, setSelectedItem] = useState(null);
@@ -392,113 +506,155 @@ const ManagedProperties = () => {
     );
   }
 
-  const activeProperties = user?.subscriptions || [];
+  const purchasedProperties = user?.purchasedProperties || [];
+  const activeSubscriptions = user?.subscriptions || [];
 
   return (
-    <div className="flex flex-col gap-5 py-5">
-      <p
-        className={`${fontSize.lg} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
-      >
-        Bought Properties
-      </p>
-
+    <div className="flex flex-col gap-8 py-5">
+      {/* SECTION 1: BOUGHT PROPERTIES */}
       <div className="flex flex-col gap-4">
-        {activeProperties.length === 0 ? (
-          <p className="text-gray-400 text-center py-10">
-            No purchased properties in your portfolio yet.
-          </p>
-        ) : (
-          activeProperties.map((sub) => {
-            const pkg = sub.package;
-            return (
+        <p
+          className={`${fontSize.lg} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
+        >
+          Bought Properties
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {purchasedProperties.length === 0 ? (
+            <p className="text-gray-400 text-center py-6 bg-gray-50 rounded-xl text-xs col-span-full">
+              No purchased properties in your portfolio yet.
+            </p>
+          ) : (
+            purchasedProperties.map((prop) => (
               <div
-                key={sub.id}
+                key={prop.id}
                 onClick={() =>
                   setSelectedItem({
-                    ...pkg,
-                    amount: `₦${Number(sub.amount).toLocaleString()}`,
-                    date: new Date(sub.startDate).toLocaleDateString(),
-                    roi: `${pkg?.roi || 0}%`,
-                    duration: `${pkg?.durationMonths || 0} months`,
-                    interestEarned: `₦${(((sub.amount || 0) * (pkg?.roi || 0)) / 100).toLocaleString()}`,
-                    transactionId: sub.id.slice(0, 15),
-                  })
-                }
-                className="bg-white rounded-[10px] shadow border-[0.2px] border-[#CCCCCCB2] p-5 flex flex-col gap-4 cursor-pointer hover:shadow-md transition duration-200"
-              >
-                <p
-                  className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
-                >
-                  {pkg?.name || "Premium Real Estate Package"}
-                </p>
-
-                <div className="flex items-start justify-between">
-                  <div className="flex flex-col gap-1">
-                    <p
-                      className={`${fontSize.xs} ${fontWeight.medium} ${textColor.secondary} ${fontFamily.main}`}
-                    >
-                      Location
-                    </p>
-                    <p
-                      className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
-                    >
-                      {pkg?.location || "Lagos"}
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-1 text-right">
-                    <p
-                      className={`${fontSize.xs} ${fontWeight.medium} ${textColor.secondary} ${fontFamily.main}`}
-                    >
-                      Purchase Amount
-                    </p>
-                    <p
-                      className={`${fontSize.sm} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
-                    >
-                      ₦{Number(sub.amount).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100" />
-
-                <div className="flex items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <rect
-                      x="3"
-                      y="4"
-                      width="18"
-                      height="18"
-                      rx="2"
-                      stroke="#888"
-                      strokeWidth="1.8"
-                    />
-                    <path
-                      d="M16 2v4M8 2v4M3 10h18"
-                      stroke="#888"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <p
-                    className={`${fontSize.sm} ${fontWeight.normal} ${textColor.secondary} ${fontFamily.main}`}
-                  >
-                    Date Purchased:{" "}
-                    {new Date(sub.startDate).toLocaleDateString("en-US", {
+                    ...prop,
+                    type: "Direct Purchase",
+                    amount: `₦${Number(prop.amount).toLocaleString()}`,
+                    date: new Date(prop.createdAt).toLocaleDateString("en-US", {
                       month: "long",
                       day: "numeric",
                       year: "numeric",
-                    })}
-                  </p>
+                    }),
+                    transactionId: prop.reference || prop.id,
+                  })
+                }
+                className="bg-white rounded-[16px] shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200 flex flex-col group"
+              >
+                {prop.coverImage && (
+                  <div className="w-full h-44 overflow-hidden bg-gray-100">
+                    <img
+                      src={prop.coverImage}
+                      alt={prop.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                )}
+                <div className="p-4 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <p
+                      className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main} truncate`}
+                    >
+                      {prop.title}
+                    </p>
+                    <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                      Acquired
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>📍 {prop.location || "Lagos, Nigeria"}</span>
+                    <strong className="text-[#05062F] text-sm">
+                      ₦{Number(prop.amount).toLocaleString()}
+                    </strong>
+                  </div>
                 </div>
               </div>
-            );
-          })
-        )}
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* SECTION 2: INVESTMENT PORTFOLIOS */}
+      <div className="flex flex-col gap-4">
+        <p
+          className={`${fontSize.lg} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main}`}
+        >
+          Investment Portfolios
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {activeSubscriptions.length === 0 ? (
+            <p className="text-gray-400 text-center py-6 bg-gray-50 rounded-xl text-xs col-span-full">
+              No active investment portfolios found.
+            </p>
+          ) : (
+            activeSubscriptions.map((sub) => {
+              const pkg = sub.package;
+              return (
+                <div
+                  key={sub.id}
+                  onClick={() =>
+                    setSelectedItem({
+                      ...pkg,
+                      title: pkg?.name,
+                      type: "Investment Package",
+                      amount: `₦${Number(sub.amount).toLocaleString()}`,
+                      date: new Date(sub.startDate).toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        },
+                      ),
+                      roi: `${pkg?.roi || 0}%`,
+                      duration: `${pkg?.durationMonths || 0} months`,
+                      interestEarned: `₦${(((sub.amount || 0) * (pkg?.roi || 0)) / 100).toLocaleString()}`,
+                      transactionId: sub.id,
+                    })
+                  }
+                  className="bg-white rounded-[16px] shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200 flex flex-col group"
+                >
+                  {pkg?.coverImage && (
+                    <div className="w-full h-44 overflow-hidden bg-gray-100">
+                      <img
+                        src={pkg.coverImage}
+                        alt={pkg.name}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <div className="p-4 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <p
+                        className={`${fontSize.md} ${fontWeight.medium} ${textColor.primary} ${fontFamily.main} truncate`}
+                      >
+                        {pkg?.name || "Premium Real Estate Package"}
+                      </p>
+                      <span className="bg-blue-50 text-[#2540A8] text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                        {pkg?.roi ? `${pkg.roi}% ROI` : "Active"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>📍 {pkg?.location || "Lagos"}</span>
+                      <strong className="text-[#05062F] text-sm">
+                        ₦{Number(sub.amount).toLocaleString()}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {selectedItem && (
-        <SettingsModal
-          type="property"
+        <ItemDetailModal
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
         />
@@ -579,7 +735,7 @@ const Referrals = () => {
 };
 
 // ==========================================================
-// 4. SECURITY & MODALS (Includes Transaction PIN State Checks)
+// 4. SECURITY & MODALS
 // ==========================================================
 const Security = ({ autoOpenPin = false }) => {
   const [securityModal, setSecurityModal] = useState(null);
@@ -618,7 +774,6 @@ const Security = ({ autoOpenPin = false }) => {
     },
   ];
 
-  // Auto open Transaction Pin modal if requested from redirection
   useEffect(() => {
     if (autoOpenPin) {
       setSecurityModal("Transaction Pin");
@@ -711,7 +866,8 @@ const ContactUs = () => (
     <div>
       <h1 className="font-[#05062F] font-semibold text-[24px]">Contact Us</h1>
       <p className="w-3/6 mt-2">
-        We’re here to help! Reach out to us anytime for support, questions, or feedback.
+        We’re here to help! Reach out to us anytime for support, questions, or
+        feedback.
       </p>
 
       <div className="mt-5 flex flex-col gap-4">
@@ -731,7 +887,9 @@ const ContactUs = () => (
       </div>
 
       <div className="mt-13 text-center">
-        <h1 className="font-semibold text-[#05062F] text-[16px]">Social Media Handle</h1>
+        <h1 className="font-semibold text-[#05062F] text-[16px]">
+          Social Media Handle
+        </h1>
         <div className="flex justify-center gap-4 mt-2">
           <img src={Xicon} alt="Twitter" />
           <img src={Iicon} alt="Instagram" />
@@ -757,11 +915,9 @@ const SettingsLayout = () => {
 
   const panelAvatarInputRef = useRef(null);
 
-  // Read route state flags
   const shouldAutoOpenKyc = Boolean(location.state?.openKyc);
   const shouldAutoOpenPin = Boolean(location.state?.openPin);
 
-  // Handle auto tab switching based on redirection state
   useEffect(() => {
     if (shouldAutoOpenKyc) {
       setActive("personal");
