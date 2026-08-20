@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios.js";
@@ -25,7 +25,13 @@ const InvestmentDescription = () => {
   const queryClient = useQueryClient();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedAmount, setSelectedAmount] = useState(0);
+
+  // Dynamic Tier & Duration Selection States
+  const [selectedTierIndex, setSelectedTierIndex] = useState(0);
+  const [isPackageDropdownOpen, setIsPackageDropdownOpen] = useState(false);
+  const [isDurationDropdownOpen, setIsDurationDropdownOpen] = useState(false);
+  const packageDropdownRef = useRef(null);
+  const durationDropdownRef = useRef(null);
 
   // Media & Slider States
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -41,12 +47,34 @@ const InvestmentDescription = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [id]);
 
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        packageDropdownRef.current &&
+        !packageDropdownRef.current.contains(e.target)
+      ) {
+        setIsPackageDropdownOpen(false);
+      }
+      if (
+        durationDropdownRef.current &&
+        !durationDropdownRef.current.contains(e.target)
+      ) {
+        setIsDurationDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         setSelectedImageModal(null);
         setActiveVideoModal(null);
         setIsCallModalOpen(false);
+        setIsPackageDropdownOpen(false);
+        setIsDurationDropdownOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -86,39 +114,31 @@ const InvestmentDescription = () => {
   });
 
   const walletBalance = Number(walletBalanceData || 0);
-  const userActiveStake = Number(pkg?.userActiveStake || 0);
-  const maxAmount = Number(pkg?.maxAmount || 0);
-  const minAmount = Number(pkg?.minAmount || 0);
 
-  // Cumulative Boundary Calculations
-  const remainingCapacity = Math.max(0, maxAmount - userActiveStake);
-  const isMaxLimitReached = maxAmount > 0 && userActiveStake >= maxAmount;
+  // Strictly dynamic tiers coming from backend (No fallback)
+  const availableTiers =
+    pkg?.tiers && Array.isArray(pkg.tiers) ? pkg.tiers : [];
+  const currentTier = availableTiers[selectedTierIndex] ||
+    availableTiers[0] || {
+      amount: 0,
+      durationMonths: 12,
+      roi: 0,
+    };
 
-  useEffect(() => {
-    if (pkg) {
-      if (isMaxLimitReached) {
-        setSelectedAmount(0);
-      } else if (userActiveStake > 0) {
-        setSelectedAmount(Math.min(remainingCapacity, 50000));
-      } else {
-        setSelectedAmount(minAmount);
-      }
-    }
-  }, [pkg, isMaxLimitReached, userActiveStake, remainingCapacity, minAmount]);
+  const selectedAmount = Number(currentTier.amount);
+  const selectedDuration = Number(currentTier.durationMonths);
+  const currentRoi = Number(currentTier.roi);
 
   // Live Projections Engine
   const projections = useMemo(() => {
-    const P = Number(selectedAmount) || 0;
-    const roi = Number(pkg?.roi) || 0;
-    const durationMonths = Number(pkg?.durationMonths) || 1;
-
-    const expectedProfit = (P * roi) / 100;
+    const P = selectedAmount;
+    const expectedProfit = (P * currentRoi) / 100;
     const totalPayback = P + expectedProfit;
-    const totalDays = durationMonths * 30;
-    const dailyAccrual = expectedProfit / totalDays;
+    const totalDays = selectedDuration * 30;
+    const dailyAccrual = totalDays > 0 ? expectedProfit / totalDays : 0;
 
     const maturityDate = new Date();
-    maturityDate.setMonth(maturityDate.getMonth() + durationMonths);
+    maturityDate.setMonth(maturityDate.getMonth() + selectedDuration);
 
     return {
       principal: P,
@@ -131,33 +151,20 @@ const InvestmentDescription = () => {
         year: "numeric",
       }),
     };
-  }, [selectedAmount, pkg]);
+  }, [selectedAmount, currentRoi, selectedDuration]);
 
   // Enforce Boundary Validation
   const validationError = useMemo(() => {
-    if (isMaxLimitReached) {
-      return `Maximum limit of ₦${maxAmount.toLocaleString()} reached for this package.`;
-    }
-    if (!selectedAmount || selectedAmount <= 0) return "Enter an amount";
-    if (userActiveStake === 0 && selectedAmount < minAmount)
-      return `Min initial limit is ₦${minAmount.toLocaleString()}`;
-    if (selectedAmount > remainingCapacity)
-      return `Top-up exceeds remaining limit of ₦${remainingCapacity.toLocaleString()}`;
+    if (selectedAmount <= 0) return "Select a valid investment package tier";
     if (selectedAmount > walletBalance) return "Insufficient wallet balance";
     return null;
-  }, [
-    selectedAmount,
-    isMaxLimitReached,
-    maxAmount,
-    userActiveStake,
-    minAmount,
-    remainingCapacity,
-    walletBalance,
-  ]);
+  }, [selectedAmount, walletBalance]);
 
   const handleSubscriptionSubmit = async (transactionPin) => {
     await subscribeToInvestment(id, {
       amount: selectedAmount,
+      durationMonths: selectedDuration,
+      roi: currentRoi,
       transactionPin,
     });
 
@@ -170,10 +177,8 @@ const InvestmentDescription = () => {
 
   const name = pkg?.name || "Investment Opportunity";
   const description = pkg?.description || "No description provided.";
-  const roi = pkg?.roi ? `${pkg.roi}% ROI` : "0% ROI";
-  const duration = pkg?.durationMonths
-    ? `${pkg.durationMonths} Months`
-    : "Flexible Duration";
+  const roiStr = `${currentRoi}% ROI`;
+  const durationStr = `${selectedDuration} Months`;
 
   // Consolidate gallery images and videos from backend response
   const gallery =
@@ -261,10 +266,10 @@ const InvestmentDescription = () => {
   const modalDetails = [
     { label: "Package Name", value: name },
     {
-      label: "Selected Volume",
+      label: "Selected Package",
       value: `₦${Number(selectedAmount).toLocaleString()}`,
     },
-    { label: "Tenure Lockup", value: duration },
+    { label: "Tenure Lockup", value: durationStr },
     {
       label: "Expected Return",
       value: `+₦${projections.expectedProfit.toLocaleString()}`,
@@ -307,7 +312,6 @@ const InvestmentDescription = () => {
       <Wrapper>
         {/* ============ MOBILE SURFACE VIEW ============ */}
         <div className="block md:hidden">
-          {/* Mobile Hero Slider with Smooth Cross-Fade, Auto-Slide, and Hover Zoom */}
           <div
             className="relative -mx-4 -mt-4 overflow-hidden group h-72"
             onMouseEnter={() => setIsHovered(true)}
@@ -410,7 +414,7 @@ const InvestmentDescription = () => {
                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors pointer-events-none" />
 
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-9 h-9 bg-white/95 rounded-full flex items-center justify-center shadow transition-transform duration-300 group-hover:scale-110">
+                      <div className="w-8 h-8 bg-white/95 rounded-full flex items-center justify-center shadow-md">
                         <svg
                           width="14"
                           height="14"
@@ -435,9 +439,8 @@ const InvestmentDescription = () => {
 
         {/* ============ DESKTOP GRID LAYOUT ============ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start w-full">
-          {/* Left Column: Media Stack with Hover Zoom & Active Slider */}
-          <div className="flex flex-col gap-4 w-full">
-            {/* Main Cover Image Slider */}
+          {/* Left Column: Media Stack */}
+          <div className="md:flex hidden flex-col gap-4 w-full">
             <div
               className="relative rounded-[20px] overflow-hidden shadow-sm border border-gray-100 group h-[360px]"
               onMouseEnter={() => setIsHovered(true)}
@@ -514,14 +517,14 @@ const InvestmentDescription = () => {
               </div>
             </div>
 
-            {/* Gallery Thumbnails Grid */}
+            {/* Gallery Thumbnails Grid (Scrollable Container) */}
             {gallery.length > 1 && (
-              <div className="grid grid-cols-4 gap-3">
-                {gallery.slice(0, 4).map((img, idx) => (
+              <div className="flex gap-3 overflow-x-auto py-1 no-scrollbar">
+                {gallery.map((img, idx) => (
                   <div
                     key={idx}
                     onClick={() => setCurrentSlideIndex(idx)}
-                    className={`relative w-full h-20 rounded-xl overflow-hidden border cursor-pointer shadow-xs group transition-all duration-200 ${
+                    className={`relative shrink-0 w-28 h-20 rounded-xl overflow-hidden border cursor-pointer shadow-xs group transition-all duration-200 ${
                       currentSlideIndex === idx
                         ? "border-[#05062F] ring-2 ring-[#05062F]/30"
                         : "border-gray-200 opacity-80 hover:opacity-100"
@@ -532,23 +535,12 @@ const InvestmentDescription = () => {
                       alt={`Thumbnail preview ${idx + 1}`}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />
-                    {idx === 3 && gallery.length > 4 && (
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openImageModal(3);
-                        }}
-                        className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-bold"
-                      >
-                        +{gallery.length - 4} More
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Package Video Tour Section */}
+            {/* Package Video Tour Section with Play Button */}
             {videos.length > 0 && (
               <div className="mt-2 bg-gray-50/80 rounded-2xl p-4 border border-gray-100 flex flex-col gap-3">
                 <div className="flex justify-between items-center">
@@ -589,6 +581,7 @@ const InvestmentDescription = () => {
                           </svg>
                         </div>
                       </div>
+
                       <div className="absolute bottom-2 left-2.5 z-10 bg-black/70 text-white text-[10px] font-semibold px-2 py-0.5 rounded backdrop-blur-sm">
                         Tour Video #{vIdx + 1}
                       </div>
@@ -618,181 +611,193 @@ const InvestmentDescription = () => {
           {/* Right Column: Investment Control Terminal & Manager Profile */}
           <div className="w-full flex flex-col justify-between gap-5">
             <div>
-              <div className="flex justify-between items-start border-b border-gray-100 pb-4">
+              <div className="flex justify-between items-center">
                 <div>
                   <h1
                     className={`${fontSize["2xl"]} ${fontWeight.semibold} ${fontFamily.main} ${textColor.primary}`}
                   >
                     {name}
                   </h1>
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-1">
+                  <p className="text-xs text-gray-400 font-semibold mt-1">
                     {pkg?.category || "DYNAMIC GROWTH PACKAGE"}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-gray-400 uppercase font-bold">
-                    Allowed Boundaries
-                  </p>
-                  <p className="text-sm font-bold text-[#05062F] mt-0.5">
-                    ₦{minAmount.toLocaleString()} - ₦
-                    {maxAmount.toLocaleString()}
-                  </p>
+                <div className="text-right text-[#2540A8]/80 font-medium flex items-center gap-2">
+                  <p className="text-xs ">Current Balance</p>
+                  <p className="text-sm ">₦{walletBalance.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* DYNAMIC SELECT PACKAGE & DURATION DROPDOWNS */}
+              <div className="flex flex-col gap-4 mt-5">
+                {/* 1. Select Package Dropdown */}
+                <div
+                  className="flex items-center gap-3 justify-start relative"
+                  ref={packageDropdownRef}
+                >
+                  <span className="font-medium text-[#05062F]/70">
+                    Select Package
+                  </span>
+                  <div className="relative">
+                    <button
+                      onClick={() =>
+                        setIsPackageDropdownOpen(!isPackageDropdownOpen)
+                      }
+                      className="bg-white text-[#05062F]/70 flex items-center gap-1 cursor-pointer transition"
+                    >
+                      <span>
+                        {availableTiers.length > 0
+                          ? `₦${selectedAmount.toLocaleString()}`
+                          : "No packages set"}
+                      </span>
+                      {availableTiers.length > 0 && (
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          className={`transition-transform duration-200 ${
+                            isPackageDropdownOpen ? "rotate-180" : ""
+                          }`}
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      )}
+                    </button>
+
+                    {isPackageDropdownOpen && availableTiers.length > 0 && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-30 py-2">
+                        {availableTiers.map((tier, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setSelectedTierIndex(idx);
+                              setIsPackageDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-xs font-bold transition hover:bg-gray-50 cursor-pointer ${
+                              selectedTierIndex === idx
+                                ? "text-[#2540A8] bg-blue-50/50"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            ₦{Number(tier.amount).toLocaleString()}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Select Duration Dropdown */}
+                <div
+                  className="flex items-center justify-start gap-3 relative pt-3"
+                  ref={durationDropdownRef}
+                >
+                  <span className="font-medium text-[#05062F]/70">
+                    Select Duration
+                  </span>
+                  <div className="relative">
+                    <button
+                      onClick={() =>
+                        setIsDurationDropdownOpen(!isDurationDropdownOpen)
+                      }
+                      className="bg-white text-[#05062F]/70 flex items-center gap-1 cursor-pointer transition"
+                    >
+                      <span>
+                        {availableTiers.length > 0
+                          ? `${selectedDuration} months`
+                          : "N/A"}
+                      </span>
+                      {availableTiers.length > 0 && (
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          className={`transition-transform duration-200 ${
+                            isDurationDropdownOpen ? "rotate-180" : ""
+                          }`}
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      )}
+                    </button>
+
+                    {isDurationDropdownOpen && availableTiers.length > 0 && (
+                      <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-30 py-2">
+                        {availableTiers.map((tier, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setSelectedTierIndex(idx);
+                              setIsDurationDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-xs font-bold transition hover:bg-gray-50 cursor-pointer ${
+                              selectedTierIndex === idx
+                                ? "text-[#2540A8] bg-blue-50/50"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            {tier.durationMonths} months ({tier.roi}% ROI)
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Badges Bar */}
-              <div className="flex items-center gap-3 mt-4">
-                <BadgeButton icon={Calenderimg} label={duration} />
-                <BadgeButton icon={trendUp} label={roi} />
+              <div className="flex items-center gap-3 mt-8">
+                <BadgeButton icon={Calenderimg} label={durationStr} />
+                <BadgeButton icon={trendUp} label={roiStr} />
                 <BadgeButton
                   icon={MapIcon}
                   label={pkg?.location || "Lagos Base"}
                 />
               </div>
 
-              {/* Volume Selection Control */}
-              <div className="mt-6 bg-gray-50/80 p-4 rounded-2xl border border-gray-100 space-y-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-[#05062F]">
-                    {isMaxLimitReached
-                      ? "Maximum Cap Reached"
-                      : "Select Investment Volume (₦)"}
-                  </span>
-                  <span className="text-gray-500">
-                    Wallet:{" "}
-                    <strong className="text-[#05062F]">
-                      ₦{walletBalance.toLocaleString()}
-                    </strong>
-                  </span>
-                </div>
-
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">
-                    ₦
-                  </span>
-                  <input
-                    type="number"
-                    disabled={isMaxLimitReached}
-                    value={selectedAmount || ""}
-                    onChange={(e) => setSelectedAmount(Number(e.target.value))}
-                    className="w-full bg-white border border-gray-200 rounded-xl pl-8 pr-28 py-3 text-lg font-bold text-[#05062F] outline-none focus:border-blue-600 transition disabled:bg-gray-100 disabled:text-gray-400"
-                  />
-                  <button
-                    disabled={isMaxLimitReached}
-                    onClick={() =>
-                      setSelectedAmount(
-                        Math.min(walletBalance, remainingCapacity),
-                      )
-                    }
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-50 text-[#2540A8] hover:bg-blue-100 text-xs px-3 py-1.5 rounded-lg font-bold transition disabled:opacity-40 cursor-pointer"
-                  >
-                    Max Limit
-                  </button>
-                </div>
-
-                {/* Quick Add Buttons */}
-                {!isMaxLimitReached && (
-                  <div className="flex items-center gap-2 pt-1">
-                    <span className="text-[11px] text-gray-400 font-medium">
-                      Quick Add:
-                    </span>
-                    <button
-                      onClick={() =>
-                        setSelectedAmount((prev) =>
-                          Math.min(remainingCapacity, prev + 50000),
-                        )
-                      }
-                      className="bg-white border border-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-lg font-medium hover:bg-gray-100 cursor-pointer"
-                    >
-                      +₦50,000
-                    </button>
-                    <button
-                      onClick={() =>
-                        setSelectedAmount((prev) =>
-                          Math.min(remainingCapacity, prev + 100000),
-                        )
-                      }
-                      className="bg-white border border-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-lg font-medium hover:bg-gray-100 cursor-pointer"
-                    >
-                      +₦100,000
-                    </button>
-                  </div>
-                )}
-
-                {validationError && (
-                  <p className="text-xs text-red-500 font-medium bg-red-50 p-2 rounded-lg border border-red-100">
-                    ⚠️ {validationError}
-                  </p>
-                )}
-              </div>
-
-              {/* Real-Time Financial Projection Box */}
-              <div className="mt-4 bg-[#05062F] text-white rounded-2xl p-5 space-y-3 shadow-md">
-                <span className="text-[11px] text-gray-300 font-bold uppercase tracking-wider block">
-                  Real-Time Projection Engine
-                </span>
-
-                <div className="grid grid-cols-2 gap-4 pt-1 border-t border-gray-700/50">
-                  <div>
-                    <span className="text-[11px] text-gray-400 block">
-                      Expected Profit ({pkg?.roi}%)
-                    </span>
-                    <span className="text-lg font-bold text-emerald-400">
-                      +₦
-                      {projections.expectedProfit.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[11px] text-gray-400 block">
-                      Est. Daily Accrual
-                    </span>
-                    <span className="text-sm font-semibold text-gray-200">
-                      +₦
-                      {projections.dailyAccrual.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                      })}
-                      / day
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-gray-700/50 flex justify-between items-end">
-                  <div>
-                    <span className="text-[11px] text-gray-400 block">
-                      Total Payback at Maturity
-                    </span>
-                    <span className="text-xl font-extrabold text-white">
-                      ₦
-                      {projections.totalPayback.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </div>
-                  <div className="text-right text-[11px] text-gray-400">
-                    Maturity Date:{" "}
-                    <strong className="text-gray-200">
-                      {projections.maturityDateStr}
-                    </strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* User Active Stake Badge */}
-              {userActiveStake > 0 && (
-                <div className="mt-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3 rounded-xl flex justify-between items-center">
-                  <div>
-                    <span>✅ Active Stake: </span>
-                    <strong className="text-sm">
-                      ₦{userActiveStake.toLocaleString()}
-                    </strong>
-                  </div>
-                  <span className="text-emerald-700 font-medium">
-                    Remaining Cap: ₦{remainingCapacity.toLocaleString()}
-                  </span>
-                </div>
+              {validationError && (
+                <p className="text-xs text-red-500 font-medium bg-red-50 p-2.5 rounded-xl border border-red-100 mt-4">
+                  ⚠️ {validationError}
+                </p>
               )}
+
+              {/* Real-Time Financial Projection Box (Soft One-Line UI) */}
+              <div className="mt-5 bg-blue-50/60 border border-blue-100/60 text-[#05062F] rounded-xl px-4 py-3 flex flex-col sm:flex-row items-center justify-between text-xs gap-2 shadow-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500 font-medium">
+                    Expected Profit ({currentRoi}%):
+                  </span>
+                  <strong className="text-emerald-700 font-bold">
+                    +₦
+                    {projections.expectedProfit.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
+                  </strong>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500 font-medium">
+                    Total Payback:
+                  </span>
+                  <strong className="text-[#05062F] font-bold">
+                    ₦
+                    {projections.totalPayback.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
+                  </strong>
+                </div>
+                <div className="flex items-center gap-2 text-gray-500">
+                  <span>Maturity:</span>
+                  <strong className="text-gray-700">
+                    {projections.maturityDateStr}
+                  </strong>
+                </div>
+              </div>
 
               {/* Package Description */}
               <p className="text-sm text-gray-600 leading-relaxed mt-4">
@@ -802,22 +807,15 @@ const InvestmentDescription = () => {
               {/* Action Triggers: Invest Button, Call Agent & Message Owner */}
               <div className="mt-6 flex flex-col gap-2.5">
                 <Button
-                  text={
-                    isMaxLimitReached
-                      ? "Max Limit Reached"
-                      : userActiveStake > 0
-                        ? "Top Up Investment"
-                        : "Invest Now"
-                  }
+                  text="Invest Now"
                   width="w-full"
-                  bg={isMaxLimitReached ? "bg-gray-400" : "bg-[#05062F]"}
-                  disabled={!!validationError || isMaxLimitReached}
-                  className="text-white text-base font-semibold rounded-xl py-3.5 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
-                  onClick={() => !isMaxLimitReached && setModalOpen(true)}
+                  bg="bg-[#05062F]"
+                  disabled={!!validationError || availableTiers.length === 0}
+                  className="text-white text-base font-semibold rounded-xl py-3.5 transition shadow-sm cursor-pointer"
+                  onClick={() => setModalOpen(true)}
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Call Agent Button */}
                   <button
                     onClick={() => setIsCallModalOpen(true)}
                     className="w-full bg-[#C82A2A] hover:bg-[#a82222] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2 transition-colors duration-200 cursor-pointer h-[46px] shadow-xs font-medium text-sm"
@@ -833,9 +831,8 @@ const InvestmentDescription = () => {
                     Call Agent
                   </button>
 
-                  {/* Message Owner Button */}
                   <button
-                    onClick={() => navigate("/app/chat")}
+                    onClick={() => navigate(`/app/chat/${pkg?.agent?.id}`)}
                     className="w-full bg-[#DBE8FD] hover:bg-[#ccdefd] text-[#05062F] rounded-xl py-3 px-4 flex items-center justify-center gap-2 transition-colors duration-200 cursor-pointer h-[46px] font-medium text-sm"
                   >
                     <svg
@@ -856,7 +853,6 @@ const InvestmentDescription = () => {
                 </div>
               </div>
 
-              {/* Dynamic Owner/Manager Profile Capsule ("Marketed by") */}
               {/* Dynamic Owner/Manager Profile Capsule ("Marketed by") */}
               {agent && (
                 <div className="bg-[#F8FAFD] border border-gray-100 rounded-2xl p-5 mt-5 flex flex-col gap-4 shadow-xs">
@@ -947,7 +943,6 @@ const InvestmentDescription = () => {
                     </div>
                   </div>
 
-                  {/* Updated Action Link -> Routes to Owner Investments */}
                   <div className="pt-3 border-t border-gray-200/60">
                     <Link
                       to={`/app/owner-investments/${agent.id || "primary"}`}
@@ -1014,7 +1009,7 @@ const InvestmentDescription = () => {
         )}
       </Wrapper>
 
-      {/* ============ 1. FULL-RESOLUTION IMAGE LIGHTBOX MODAL ============ */}
+      {/* Lightbox Image Modal */}
       {selectedImageModal && (
         <div
           className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300"
@@ -1022,28 +1017,10 @@ const InvestmentDescription = () => {
         >
           <button
             onClick={() => setSelectedImageModal(null)}
-            className="absolute top-5 right-5 z-50 w-11 h-11 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center transition cursor-pointer text-lg font-bold"
+            className="absolute top-5 right-5 z-50 w-11 h-11 bg-white/25 hover:bg-white/40 text-white rounded-full flex items-center justify-center transition cursor-pointer text-lg font-bold"
           >
             ✕
           </button>
-
-          {gallery.length > 1 && (
-            <>
-              <button
-                onClick={handlePrevModalImage}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-50 w-12 h-12 bg-white/20 hover:bg-white/40 text-white rounded-full flex items-center justify-center transition cursor-pointer text-xl font-bold"
-              >
-                ‹
-              </button>
-              <button
-                onClick={handleNextModalImage}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-50 w-12 h-12 bg-white/20 hover:bg-white/40 text-white rounded-full flex items-center justify-center transition cursor-pointer text-xl font-bold"
-              >
-                ›
-              </button>
-            </>
-          )}
-
           <div
             className="w-full max-w-4xl h-[75vh] md:h-[80vh] flex flex-col items-center justify-center gap-3 relative"
             onClick={(e) => e.stopPropagation()}
@@ -1060,7 +1037,7 @@ const InvestmentDescription = () => {
         </div>
       )}
 
-      {/* ============ 2. POPUP VIDEO PLAYER MODAL ============ */}
+      {/* Video Player Modal */}
       {activeVideoModal && (
         <div
           className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300"
@@ -1068,11 +1045,10 @@ const InvestmentDescription = () => {
         >
           <button
             onClick={() => setActiveVideoModal(null)}
-            className="absolute top-5 right-5 z-50 w-11 h-11 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center transition cursor-pointer text-lg font-bold"
+            className="absolute top-5 right-5 z-50 w-11 h-11 bg-white/25 hover:bg-white/40 text-white rounded-full flex items-center justify-center transition cursor-pointer text-lg font-bold"
           >
             ✕
           </button>
-
           <div
             className="w-full max-w-3xl bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10"
             onClick={(e) => e.stopPropagation()}
@@ -1087,7 +1063,7 @@ const InvestmentDescription = () => {
         </div>
       )}
 
-      {/* ============ 3. CALL AGENT NUMBERS MODAL ============ */}
+      {/* Call Agent Modal */}
       {isCallModalOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 transition-all duration-300"
@@ -1100,7 +1076,6 @@ const InvestmentDescription = () => {
             <button
               onClick={() => setIsCallModalOpen(false)}
               className="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition cursor-pointer text-lg font-bold"
-              aria-label="Close modal"
             >
               ✕
             </button>
@@ -1158,45 +1133,12 @@ const InvestmentDescription = () => {
                       {agentPhone}
                     </span>
                   </div>
-
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-gray-400 group-hover:text-gray-600 transition-transform group-hover:translate-x-0.5"
-                  >
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
                 </a>
               ) : (
                 <div className="text-center py-4 text-xs text-gray-400">
                   No active phone contact available for this package owner.
                 </div>
               )}
-            </div>
-
-            <div className="flex items-start gap-2 text-xs text-gray-500 pt-1">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="shrink-0 mt-0.5 text-gray-400"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="16" x2="12" y2="12" />
-                <line x1="12" y1="8" x2="12.01" y2="8" />
-              </svg>
-              <p className="leading-tight">
-                Tap a number to start a call. Standard call rates may apply.
-              </p>
             </div>
           </div>
         </div>

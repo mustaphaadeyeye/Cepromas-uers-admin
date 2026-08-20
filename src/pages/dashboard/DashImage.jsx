@@ -11,19 +11,15 @@ import { Link } from "react-router-dom";
 import LocationIcon from "../../assets/icons/locationicon.png";
 import Button from "../../components/buttons/Button";
 import Cicon from "../../assets/icons/cicon.png";
-import { useToggleFavourite } from "../../hooks/property/useToggleFavourite"; // Properties toggle hook
-import { useToggleInvestmentFavourite } from "../../hooks/investment/useToggleInvestmentFavourite"; // 👈 ADDED: Investments toggle hook
+import { useToggleFavourite } from "../../hooks/property/useToggleFavourite";
+import { useToggleInvestmentFavourite } from "../../hooks/investment/useToggleInvestmentFavourite";
 
 const DashImage = ({ to, property, investment, isFavourite = false }) => {
   const Wrapper = to ? Link : "div";
 
-  // Check if this card instance is acting as an investment or marketplace property
   const isInvestment = !!investment;
-
-  // 1. Sync database value with optimistic local rendering state
   const [localIsFavourite, setLocalIsFavourite] = useState(isFavourite);
 
-  // 2. Instantiate BOTH toggle mutations
   const { mutate: togglePropFav, isPending: propPending } =
     useToggleFavourite();
   const { mutate: toggleInvestFav, isPending: investPending } =
@@ -35,7 +31,6 @@ const DashImage = ({ to, property, investment, isFavourite = false }) => {
     setLocalIsFavourite(isFavourite);
   }, [isFavourite]);
 
-  // 3. Prevent card link navigation and toggle favorites cleanly based on context
   const handleFavouriteClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -46,7 +41,6 @@ const DashImage = ({ to, property, investment, isFavourite = false }) => {
       const investmentId = investment?.id;
       if (!investmentId) return;
 
-      // Optimistically toggle state locally
       setLocalIsFavourite((prev) => !prev);
 
       toggleInvestFav(investmentId, {
@@ -57,18 +51,14 @@ const DashImage = ({ to, property, investment, isFavourite = false }) => {
           }
         },
         onError: (err) => {
-          console.error(
-            "❌ Failed to save investment favorite status, rolling back:",
-            err,
-          );
-          setLocalIsFavourite(isFavourite); // Rollback state
+          console.error("❌ Failed to save investment favorite status:", err);
+          setLocalIsFavourite(isFavourite);
         },
       });
     } else {
       const propertyId = property?.id;
       if (!propertyId) return;
 
-      // Optimistically toggle state locally
       setLocalIsFavourite((prev) => !prev);
 
       togglePropFav(propertyId, {
@@ -79,26 +69,41 @@ const DashImage = ({ to, property, investment, isFavourite = false }) => {
           }
         },
         onError: (err) => {
-          console.error(
-            "❌ Failed to save property favorite status, rolling back:",
-            err,
-          );
-          setLocalIsFavourite(isFavourite); // Rollback state
+          console.error("❌ Failed to save property favorite status:", err);
+          setLocalIsFavourite(isFavourite);
         },
       });
     }
   };
 
-  // Bind parameters dynamically based on data source
+  // Extract Tiers and calculate minimum entry amount & ROI range dynamically
+  const tiers = Array.isArray(investment?.tiers) ? investment.tiers : [];
+  const minAmount =
+    tiers.length > 0
+      ? Math.min(...tiers.map((t) => Number(t.amount || 0)))
+      : Number(investment?.minAmount || 0);
+
+  const rois = tiers.map((t) => Number(t.roi || 0));
+  const minRoi =
+    rois.length > 0 ? Math.min(...rois) : Number(investment?.roi || 0);
+  const maxRoi = rois.length > 0 ? Math.max(...rois) : minRoi;
+  const roiDisplay =
+    minRoi === maxRoi ? `${minRoi}%` : `${minRoi}% - ${maxRoi}%`;
+
+  const durationVal =
+    tiers.length > 0 && tiers[0].durationMonths
+      ? tiers[0].durationMonths
+      : investment?.durationMonths || 0;
+
   const title = isInvestment
     ? investment?.name || "Investment Package"
     : property?.title || "Luxury Apartment";
   const location = isInvestment
-    ? "Lagos Regional Hub"
+    ? investment?.location || "Lagos Regional Hub"
     : property?.location || "Unknown Location";
 
   const price = isInvestment
-    ? `Min: ₦${Number(investment?.minAmount).toLocaleString()}`
+    ? `₦${minAmount.toLocaleString()}`
     : property?.price
       ? `₦${Number(property.price).toLocaleString()}`
       : "Contact Agent";
@@ -107,22 +112,18 @@ const DashImage = ({ to, property, investment, isFavourite = false }) => {
     ? investment?.status || "ACTIVE"
     : property?.status || "For Sale";
 
-  // Custom display line depending on item structure
   const metadataLine = isInvestment
-    ? `${investment?.durationMonths || 0} Months Maturity Cycle`
+    ? `${durationVal} Months Maturity Cycle`
     : `${property?.bedrooms || 0} Bedrooms, ${property?.bathrooms || 0} Bathrooms${property?.area ? `, ${property.area} sqm` : ""}`;
 
-  const ROIBadge = isInvestment
-    ? `${investment?.roi || 0}% Projected ROI`
-    : "Available";
+  const ROIBadge = isInvestment ? `${roiDisplay} Projected ROI` : "Available";
 
   const imageUrl = isInvestment
-    ? investment?.images?.[0] || Bgimg
+    ? investment?.coverImage || investment?.images?.[0] || Bgimg
     : property?.images?.[0] || Bgimg;
 
   return (
     <div className="w-full rounded-[20px] bg-white shadow-md overflow-hidden relative transition-all duration-300 hover:shadow-lg">
-      {/* 4. FIXED: Always render the button wrapper container for both Properties and Investments! */}
       <button
         type="button"
         onClick={handleFavouriteClick}

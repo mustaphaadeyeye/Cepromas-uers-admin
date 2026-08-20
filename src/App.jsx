@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import MainLayout from "./layouts/MainLayout";
 import DashboardLayouts from "./pages/dashboard/DashboardLayouts";
@@ -29,6 +29,12 @@ import VerifyProperty from "./pages/property/VerifyProperty";
 import Notification from "./components/Notification";
 import OwnerProperties from "./pages/property/OwnerProperties";
 import OwnerInvestments from "./pages/investment/OwnerInvestments";
+
+// Helper wrapper to force ChatLayout to remount cleanly when changing agentId
+const ChatRouteWrapper = () => {
+  const { agentId } = useParams();
+  return <ChatLayout key={agentId || "general-chat"} />;
+};
 
 const App = () => {
   return (
@@ -106,7 +112,11 @@ const App = () => {
           <Route path="market" element={<MarketPlace />} />
           <Route path="investment" element={<InvestmentLayout />} />
           <Route path="saved" element={<SavedLayout />} />
-          <Route path="chat" element={<ChatLayout />} />
+
+          {/* Use ChatRouteWrapper to handle both routes cleanly with dynamic keys */}
+          <Route path="chat" element={<ChatRouteWrapper />} />
+          <Route path="chat/:agentId" element={<ChatRouteWrapper />} />
+
           <Route path="property/:id" element={<PropertyDetails />} />
           <Route path="verify-property" element={<VerifyProperty />} />
           <Route path="notifications" element={<Notification />} />
