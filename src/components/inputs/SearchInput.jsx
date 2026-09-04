@@ -27,7 +27,7 @@ const SearchInput = ({
         type="text"
         className={`${fontSize.sm} ${fontWeight.normal} ${fontFamily.main} ${textColor.dark} w-full h-full outline-none bg-transparent`}
         placeholder={placeholder}
-        className="w-full h-full outline-none bg-transparent text-sm"
+        // className="w-full h-full outline-none bg-transparent text-sm"
         {...props}
       />
     </div>

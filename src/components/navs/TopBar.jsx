@@ -6,56 +6,65 @@ import WalletIcon from "../../assets/icons/mywallet.svg";
 import SavedIcon from "../../assets/icons/newsavedicon.png";
 import SettingIcon from "../../assets/icons/myset.png";
 import GrowthIcon from "../../assets/icons/mygro.png";
-// import SearchInput from "../inputs/SearchInput";
-import NotificationIcon from "../../assets/icons/notIcon.png";
-import { NavLink, useNavigate } from "react-router-dom";
+import StoreIcon from "../../assets/icons/store.png";
+import ChatIcon from "../../assets/icons/chaticon.png";
 import SarahImg from "../../assets/image/sarahjohn.png";
 import ProfileImg from "../../assets/image/profile.png";
 import { fontSize, fontWeight, fontFamily, textColor } from "../styles/theme";
-import StoreIcon from "../../assets/icons/store.png"
-import ChatIcon from "../../assets/icons/chaticon.png"
-import { FiMenu, FiX, FiBell, } from "react-icons/fi";
-
-
-
+import { FiMenu, FiX, FiBell } from "react-icons/fi";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useNotifications } from "../../hooks/notification/useNotification";
+import { useQuery } from "@tanstack/react-query";
+import api from "../../api/axios";
 
 const navItems = [
-  { label: "Dashboard", icon: DashImg,     path: "/app",            end: true },
-  { label: "Growth",    icon: GrowthIcon,  path: "/app/growth",     end: true },
-  { label: "Market Place", icon: StoreIcon, path: "/app/market",    end: true },
-  { label: "Investment", icon: GrowthIcon,  path: "/app/investment", end: true },
-  { label: "Wallet",    icon: WalletIcon,  path: "/app/wallet",     end: true },
-  { label: "Saved", icon: SavedIcon, path: "/app/saved",             end: true },
-  { label: "Chat", icon: ChatIcon, path: "/app/chat",                end: true },
-  { label: "Settings",  icon: SettingIcon, path: "/app/settings",   end: true },
+  { label: "Dashboard", icon: DashImg, path: "/app", end: true },
+  { label: "Growth", icon: GrowthIcon, path: "/app/growth", end: true },
+  { label: "Market Place", icon: StoreIcon, path: "/app/market", end: true },
+  { label: "Investment", icon: GrowthIcon, path: "/app/investment", end: true },
+  { label: "Wallet", icon: WalletIcon, path: "/app/wallet", end: true },
+  { label: "Saved", icon: SavedIcon, path: "/app/saved", end: true },
+  { label: "Chat", icon: ChatIcon, path: "/app/chat", end: true },
+  { label: "Settings", icon: SettingIcon, path: "/app/settings", end: true },
 ];
 
-// Mobile bottom nav only shows these 5 items, with "Dashboard" relabeled as "Home"
 const bottomNavItems = [
-  { label: "Home",     icon: DashImg,     path: "/app",           end: true },
-  { label: "Growth",   icon: GrowthIcon,  path: "/app/growth",    end: true },
-  { label: "Wallet",   icon: WalletIcon,  path: "/app/wallet",    end: true },
-  { label: "Saved",    icon: SavedIcon,   path: "/app/saved",     end: true },
-  { label: "Settings", icon: SettingIcon, path: "/app/settings",  end: true },
+  { label: "Home", icon: DashImg, path: "/app", end: true },
+  { label: "Growth", icon: GrowthIcon, path: "/app/growth", end: true },
+  { label: "Wallet", icon: WalletIcon, path: "/app/wallet", end: true },
+  { label: "Saved", icon: SavedIcon, path: "/app/saved", end: true },
+  { label: "Settings", icon: SettingIcon, path: "/app/settings", end: true },
 ];
 
-// Whatever is in navItems but NOT already reachable from bottomNavItems on mobile.
-// These are the items the hamburger menu will reveal.
 const hamburgerNavItems = navItems.filter(
-  (item) => !bottomNavItems.some((b) => b.path === item.path)
+  (item) => !bottomNavItems.some((b) => b.path === item.path),
 );
 
-const activeFilter = "invert(20%) sepia(90%) saturate(5000%) hue-rotate(355deg) brightness(90%)";
+const activeFilter =
+  "invert(20%) sepia(90%) saturate(5000%) hue-rotate(355deg) brightness(90%)";
 
 const TopBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-
   const navigate = useNavigate();
 
-  
-const handleNotify = () => {
-  navigate("/app/notifications");
-};
+  // Fetch notifications to count unread items
+  const { notifications = [] } = useNotifications();
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  // Fetch real user profile to display dynamic avatar
+  const { data: profile } = useQuery({
+    queryKey: ["user-profile"],
+    queryFn: async () => {
+      const res = await api.get("/profile");
+      return res?.data ?? res;
+    },
+  });
+
+  const userAvatar = profile?.faceCaptureUrl || SarahImg;
+
+  const handleNotify = () => {
+    navigate("/app/notifications");
+  };
 
   return (
     <>
@@ -63,11 +72,14 @@ const handleNotify = () => {
       <header className="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50">
         <Wrapper>
           <div className="h-18 flex items-center justify-between">
-
             {/* LEFT — Logo + Desktop Nav */}
             <div className="flex items-center xl:gap-14 lg:gap-7">
               <div className="xl:flex xl:items-center lg:flex lg:items-center md:hidden hidden">
-                <img src={logoImg} alt="Logo" className="h-10 w-auto object-contain" />
+                <img
+                  src={logoImg}
+                  alt="Logo"
+                  className="h-10 w-auto object-contain"
+                />
               </div>
 
               {/* Mobile: hamburger only */}
@@ -121,19 +133,27 @@ const handleNotify = () => {
               <div className="hidden lg:block w-60">
                 {/* <SearchInput /> */}
               </div>
-              <div className="relative cursor-pointer">
-                <FiBell size={24} color="#333" strokeWidth={2} onClick={handleNotify} />
-                
+
+              {/* Notification Bell with Real Badge Counter */}
+              <div
+                onClick={handleNotify}
+                className="relative cursor-pointer w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition"
+                title="Notifications"
+              >
+                <FiBell size={22} color="#05062F" strokeWidth={2} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-xs">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </div>
+
+              {/* Real Profile Image (Desktop & Mobile) */}
               <img
-                src={SarahImg}
-                alt="Sarah John"
-                className="w-9 h-9 rounded-full object-cover hidden lg:block"
-              />
-              <img
-                src={ProfileImg}
+                onClick={() => navigate("/app/settings")}
+                src={userAvatar}
                 alt="Profile"
-                className="w-9 h-9 rounded-full object-cover block lg:hidden"
+                className="w-9 h-9 rounded-full object-cover border border-gray-200"
               />
             </div>
           </div>

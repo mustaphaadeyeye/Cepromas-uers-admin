@@ -26,7 +26,7 @@ import RequireAuth from "./components/auth/RequireAuth";
 import PropertyDetails from "./pages/property/PropertyDetails";
 import WalletVerify from "./pages/wallet/WalletVerify";
 import VerifyProperty from "./pages/property/VerifyProperty";
-import Notification from "./components/Notification";
+import Notification from "./components/notification/Notification";
 import OwnerProperties from "./pages/property/OwnerProperties";
 import OwnerInvestments from "./pages/investment/OwnerInvestments";
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { fontFamily } from "../../components/styles/theme";
-import api from "axios"; // Adjust path to your axios instance
+import api from "../../api/axios"; // 👈 Fixed import path to custom axios instance
 
 const WalletVerify = () => {
   const [searchParams] = useSearchParams();
@@ -10,7 +10,8 @@ const WalletVerify = () => {
   const [message, setMessage] = useState("Verifying payment...");
 
   useEffect(() => {
-    const txRef = searchParams.get("transaction_id");
+    const txRef =
+      searchParams.get("transaction_id") || searchParams.get("tx_ref");
 
     if (!txRef) {
       setStatus("error");
@@ -18,13 +19,11 @@ const WalletVerify = () => {
       return;
     }
 
-    // Call backend verify endpoint
     api
       .get(`/wallet/verify?transaction_id=${txRef}`)
       .then((res) => {
         setStatus("success");
         setMessage(res.data?.message || "Wallet funded successfully!");
-        // Redirect back to wallet after 2 seconds
         setTimeout(() => navigate("/app/wallet"), 2000);
       })
       .catch((err) => {
@@ -71,7 +70,7 @@ const WalletVerify = () => {
             <p className="text-gray-600 text-sm">{message}</p>
             <button
               onClick={() => navigate("/app/wallet")}
-              className="mt-4 bg-[#0f1c3f] text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1a2f5e]"
+              className="mt-4 bg-[#0f1c3f] text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1a2f5e] cursor-pointer"
             >
               Back to Wallet
             </button>

@@ -99,7 +99,7 @@ const SignUp = () => {
     referralCode: "",
     occupation: "",
     state: "",
-    role: "user",
+    role: "USER", // 🔒 Hardcoded strictly to USER
     password: "",
     confirmPassword: "",
     nin: "",
@@ -176,13 +176,6 @@ const SignUp = () => {
     }`;
   };
 
-  const getRoleClass = () => {
-    const hasError = !!getFieldError("role");
-    return `grid grid-cols-2 gap-3 mt-2 p-px rounded-md ${
-      hasError ? "border border-red-500 bg-red-50" : ""
-    }`;
-  };
-
   const isActionDisabled = useMemo(() => {
     if (step === 1) {
       return (
@@ -197,7 +190,6 @@ const SignUp = () => {
       return (
         !form.occupation.trim() ||
         !form.state ||
-        !form.role ||
         !form.password ||
         !form.confirmPassword ||
         form.password !== form.confirmPassword
@@ -233,7 +225,6 @@ const SignUp = () => {
     if (!form.occupation || !form.occupation.trim())
       errs.occupation = "Occupation is required";
     if (!form.state) errs.state = "Please select your state";
-    if (!form.role) errs.role = "Please select your role";
     if (!form.password) errs.password = "Password is required";
     if (!form.confirmPassword) errs.confirmPassword = "Confirm your password";
     else if (form.password !== form.confirmPassword)
@@ -251,18 +242,6 @@ const SignUp = () => {
   };
 
   const validateStepFour = () => true;
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setForm((p) => ({ ...p, faceCaptureUrl: reader.result }));
-      if (localErrors.faceCaptureUrl)
-        setLocalErrors((p) => ({ ...p, faceCaptureUrl: undefined }));
-    };
-    reader.readAsDataURL(file);
-  };
 
   const handleSkipKyc = () => {
     if (step === 3) {
@@ -317,7 +296,7 @@ const SignUp = () => {
       occupation: form.occupation.trim(),
       state: form.state,
       referralCode: form.referralCode.trim() || undefined,
-      role: form.role.toUpperCase(),
+      role: "USER", // 🔒 Strictly forced to USER role
       nin: form.nin?.trim() || "",
       faceCaptureUrl: form.faceCaptureUrl || "",
     };
@@ -343,7 +322,9 @@ const SignUp = () => {
         </div>
 
         <div
-          className={`"w-full max-w-xl bg-white rounded-2xl  shadow-sm" ${step === 3 || step === 4 ? "py-16 p-12" : "py-12 p-12"}`}
+          className={`w-full max-w-xl bg-white rounded-2xl shadow-sm ${
+            step === 3 || step === 4 ? "py-16 p-12" : "py-12 p-12"
+          }`}
         >
           <div className="flex items-center justify-between mb-6">
             {step !== 1 ? (
@@ -393,31 +374,12 @@ const SignUp = () => {
                   ? "Help us create a secure and personalized experience for you."
                   : "Verify your identity to secure your account and access all platform features."}
             </p>
-            <div className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-1 text-[12px] font-medium text-[#4B5563]">
+            <div className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-1 text-[12px] font-medium text-[#4B5563] mt-2">
               Step {step} of 4
             </div>
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* <h2 className="text-[18px] font-semibold mb-1">
-              {step === 1
-                ? "Personal Information"
-                : step === 2
-                  ? "Account Details"
-                  : step === 3
-                    ? "NIN"
-                    : "Face Capture"}
-            </h2> */}
-            {/* <p className="text-[#6B7280] text-[13px] leading-5 mb-4">
-              {step === 1
-                ? "Provide personal details to continue."
-                : step === 2
-                  ? "Set up your account and password."
-                  : step === 3
-                    ? "Enter your NIN or skip."
-                    : "Upload a face photo or skip to create your account."}
-            </p> */}
-
             {getFieldError("_global") && (
               <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                 {getFieldError("_global")}
@@ -562,30 +524,6 @@ const SignUp = () => {
                 )}
 
                 <label className="block text-xs text-[#6B7280] mt-3">
-                  Choose Account Role
-                </label>
-                <div className={getRoleClass()}>
-                  {[
-                    ["user", "User"],
-                    ["agent", "Agent"],
-                  ].map(([val, label]) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setForm((p) => ({ ...p, role: val }))}
-                      className={`w-full p-3 rounded-md ${form.role === val ? "border-[#02024D] bg-[#F5F7FF]" : "border border-[#E5E7EB] bg-white"}`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                {getFieldError("role") && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {getFieldError("role")}
-                  </p>
-                )}
-
-                <label className="block text-xs text-[#6B7280] mt-3">
                   Password
                 </label>
                 <div className="relative">
@@ -664,7 +602,6 @@ const SignUp = () => {
                 <label className="block text-center text-xs text-[#6B7280] mt-2">
                   Face Capture (photo)
                 </label>
-                {/* Face scan avatar */}
                 <div className="flex justify-center items-center mt-8 mb-8">
                   <img
                     src={Face}
@@ -672,16 +609,6 @@ const SignUp = () => {
                     className="w-[120px] h-[120px] object-contain"
                   />
                 </div>
-                {/* <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className={`mt-2 rounded-md px-3 py-2 border ${
-                    getFieldError("faceCaptureUrl")
-                      ? "border-red-500"
-                      : "border-[#E5E7EB]"
-                  }`}
-                /> */}
                 {getFieldError("faceCaptureUrl") && (
                   <p className="text-xs text-red-600 mt-1">
                     {getFieldError("faceCaptureUrl")}

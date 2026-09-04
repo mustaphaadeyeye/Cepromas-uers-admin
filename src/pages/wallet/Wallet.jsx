@@ -18,7 +18,6 @@ const Wallet = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleSuccess = () => {
-    // Trigger balance and transaction list re-fetch
     setRefreshKey((prev) => prev + 1);
   };
 
@@ -94,20 +93,26 @@ const Wallet = () => {
                 onClick={() => setOpen(!open)}
               />
 
-              {/* Dropdown */}
+              {/* Dropdown - Fixed filters to match backend types */}
               {open && (
                 <div className="absolute top-10 right-0 bg-white shadow-lg border border-gray-200 rounded-lg w-40 z-50">
                   <ul className="flex flex-col">
-                    {["All", "Interest", "Withdraw", "Received"].map((opt) => (
+                    {[
+                      { label: "All", value: "All" },
+                      { label: "Deposits", value: "DEPOSIT" },
+                      { label: "Withdrawals", value: "WITHDRAWAL" },
+                      { label: "Investments", value: "INVESTMENT" },
+                      { label: "Payouts / ROI", value: "PAYOUT" },
+                    ].map((opt) => (
                       <li
-                        key={opt}
+                        key={opt.value}
                         onClick={() => {
-                          setSelectedFilter(opt);
+                          setSelectedFilter(opt.value);
                           setOpen(false);
                         }}
-                        className="px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                        className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-sm text-gray-700"
                       >
-                        {opt}
+                        {opt.label}
                       </li>
                     ))}
                   </ul>

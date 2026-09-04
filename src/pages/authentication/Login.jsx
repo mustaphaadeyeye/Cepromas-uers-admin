@@ -7,6 +7,7 @@ import GlobalLoader from "../../components/loaders/GlobalLoader";
 import GlobalModal from "../../components/modals/GlobalModal";
 import { fontFamily } from "../../components/styles/theme";
 import { useLogin } from "../../hooks/auth/useLogin";
+import { useAuthStore } from "../../stores/auth.store";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,7 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { mutate, isLoading, error: backendError } = useLogin();
+  const logout = useAuthStore((state) => state.logout);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -128,8 +130,26 @@ const Login = () => {
     mutate(
       { email: form.email.trim(), password: form.password },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           setIsSubmitting(false);
+
+          // Extract user from API response
+          const user = data?.user || data?.data?.user;
+
+          // 🔒 Strictly allow only 'USER' role
+          if (user && user.role !== "USER") {
+            logout(); // Clear store/token
+            setModalConfig({
+              isOpen: true,
+              type: "error",
+              title: "Access Restricted",
+              message:
+                "This portal is intended for customers and investors only. Agents and Admins must log in through the partner dashboard.",
+              confirmText: "Understand",
+            });
+            return;
+          }
+
           setModalConfig({
             isOpen: true,
             type: "success",
@@ -162,7 +182,7 @@ const Login = () => {
       className={`min-h-screen bg-[#F9FAFB] flex items-center justify-center px-6 ${fontFamily.main}`}
     >
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-36 w-full lg:w-auto">
-        {/* Logo Section - hidden on mobile to save vertical space, shown on lg+ */}
+        {/* Logo Section */}
         <div className="hidden lg:flex justify-center items-center">
           <img
             src={logo}
